@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f6fb;
+  --background: #eef5fc;
   --foreground: #14141f;
 }
 
@@ -18,13 +18,13 @@ body {
   font-family: var(--font-geist-sans), Arial, sans-serif;
 }
 
-/* Soft light background wash */
+/* Soft light-blue background wash */
 .bg-mesh {
-  background-color: #f6f6fb;
+  background-color: #eef5fc;
   background-image:
-    radial-gradient(ellipse 800px 500px at 15% -5%, rgba(129, 140, 248, 0.16) 0%, transparent 60%),
-    radial-gradient(ellipse 700px 450px at 90% 0%, rgba(244, 114, 182, 0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 600px 400px at 50% 15%, rgba(96, 165, 250, 0.10) 0%, transparent 55%);
+    radial-gradient(ellipse 800px 500px at 15% -5%, rgba(96, 165, 250, 0.20) 0%, transparent 60%),
+    radial-gradient(ellipse 700px 450px at 90% 0%, rgba(129, 140, 248, 0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 400px at 50% 15%, rgba(56, 189, 248, 0.12) 0%, transparent 55%);
 }
 
 /* Translucent white nav */
