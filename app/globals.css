@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050510;
-  --foreground: #ededed;
+  --background: #f6f6fb;
+  --foreground: #14141f;
 }
 
 @theme inline {
@@ -18,39 +18,75 @@ body {
   font-family: var(--font-geist-sans), Arial, sans-serif;
 }
 
-/* Animated gradient background */
+/* Soft light background wash */
 .bg-mesh {
-  background-color: #050510;
+  background-color: #f6f6fb;
   background-image:
-    radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 10%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+    radial-gradient(ellipse 800px 500px at 15% -5%, rgba(129, 140, 248, 0.16) 0%, transparent 60%),
+    radial-gradient(ellipse 700px 450px at 90% 0%, rgba(244, 114, 182, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 400px at 50% 15%, rgba(96, 165, 250, 0.10) 0%, transparent 55%);
 }
 
-/* Glass card */
+/* Translucent white nav */
 .glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(20, 20, 31, 0.06);
+}
+
+/* Bridge widget shell */
+.widget-card {
+  background: #ffffff;
+  border: 1px solid rgba(20, 20, 31, 0.08);
+  box-shadow: 0 1px 2px rgba(20, 20, 31, 0.03), 0 20px 40px -20px rgba(76, 60, 220, 0.16);
+}
+
+/* Inner From/To slot */
+.slot-card {
+  background: #f7f7fb;
+  border: 1px solid rgba(20, 20, 31, 0.06);
+  transition: border-color 0.15s;
+}
+.slot-card:hover {
+  border-color: rgba(20, 20, 31, 0.12);
+}
+
+/* Divider swap-arrow badge between From/To */
+.swap-divider {
+  background: #ffffff;
+  border: 4px solid #f6f6fb;
+  box-shadow: 0 0 0 1px rgba(20, 20, 31, 0.08);
 }
 
 /* Input focus glow */
 input:focus {
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
-/* Gradient button */
+/* Gradient button (primary action) */
 .btn-gradient {
-  background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #6d5bf5 0%, #4338ca 100%);
   transition: opacity 0.2s, transform 0.1s;
 }
 .btn-gradient:hover:not(:disabled) {
-  opacity: 0.9;
+  opacity: 0.92;
   transform: translateY(-1px);
 }
 .btn-gradient:active:not(:disabled) {
   transform: translateY(0);
+}
+
+/* Dark button (nav / secondary emphasis) */
+.btn-dark {
+  background: #111114;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.btn-dark:hover:not(:disabled) {
+  opacity: 0.85;
+}
+.btn-dark:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 /* Shimmer loader */
@@ -59,7 +95,7 @@ input:focus {
   100% { background-position: 200% center; }
 }
 .shimmer {
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(20,20,31,0.06) 50%, transparent 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

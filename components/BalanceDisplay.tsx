@@ -15,41 +15,36 @@ export function BalanceDisplay() {
   const hasGas = gas.raw > 0n
 
   return (
-    <div className="glass rounded-2xl p-4 mb-4 fade-in">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-widest">
-          Arc Testnet Balances
-        </p>
-        {!hasGas && (
-          <a
-            href={ARC_FAUCET_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
-          >
-            Get testnet USDC
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </a>
-        )}
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white/3 rounded-xl p-3">
-          <p className="text-xs text-gray-600 mb-1">Gas USDC</p>
-          <p className={`text-sm font-semibold font-mono ${hasGas ? 'text-emerald-400' : 'text-red-400'}`}>
-            {gas.isLoading ? <span className="shimmer inline-block w-16 h-4 rounded" /> : `${gas.formatted}`}
-          </p>
-          <p className="text-xs text-gray-700 mt-0.5">native · 18 dec</p>
+    <div className="bg-white rounded-xl px-4 py-2.5 mb-4 border border-gray-200 shadow-sm fade-in flex items-center justify-between gap-3 text-xs">
+      <div className="flex items-center gap-4 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className={`w-1.5 h-1.5 rounded-full ${hasGas ? 'bg-emerald-500' : 'bg-red-500'}`} />
+          <span className="text-gray-400">Gas USDC</span>
+          <span className={`font-mono font-medium ${hasGas ? 'text-gray-700' : 'text-red-500'}`}>
+            {gas.isLoading ? <span className="shimmer inline-block w-10 h-3 rounded" /> : gas.formatted}
+          </span>
         </div>
-        <div className="bg-white/3 rounded-xl p-3">
-          <p className="text-xs text-gray-600 mb-1">ERC-20 USDC</p>
-          <p className={`text-sm font-semibold font-mono ${usdc.raw > 0n ? 'text-emerald-400' : 'text-gray-500'}`}>
-            {usdc.isLoading ? <span className="shimmer inline-block w-16 h-4 rounded" /> : `${usdc.formatted}`}
-          </p>
-          <p className="text-xs text-gray-700 mt-0.5">token · 6 dec</p>
+        <div className="w-px h-3 bg-gray-200 flex-shrink-0" />
+        <div className="flex items-center gap-1.5">
+          <span className="text-gray-400">Arc USDC</span>
+          <span className="font-mono font-medium text-gray-700">
+            {usdc.isLoading ? <span className="shimmer inline-block w-10 h-3 rounded" /> : usdc.formatted}
+          </span>
         </div>
       </div>
+      {!hasGas && (
+        <a
+          href={ARC_FAUCET_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1 flex-shrink-0"
+        >
+          Get gas
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      )}
     </div>
   )
 }
