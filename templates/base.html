@@ -3,6 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("arcconnect-theme");
+          if (t !== "light" && t !== "dark") {
+            t = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
     <title>{% block title %}One-Click Cross-Chain USDC Pay{% endblock %}</title>
     <meta
       name="description"
@@ -15,7 +26,7 @@
     <link rel="stylesheet" href="{{ static('css/output.css') }}" />
     {% block extra_head %}{% endblock %}
   </head>
-  <body class="min-h-full flex flex-col bg-gray-950 text-white">
+  <body class="min-h-full flex flex-col bg-gray-950 text-white light:bg-gray-50 light:text-gray-900">
     {% block content %}{% endblock %}
     {% block extra_scripts %}{% endblock %}
   </body>

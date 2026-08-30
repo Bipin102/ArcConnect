@@ -1,4 +1,4 @@
-import { ARC_CHAIN_ID, CHAIN_ID_TO_BRIDGE_CHAIN } from "./config.js";
+import { CHAIN_ID_TO_BRIDGE_CHAIN, CHAIN_NAMES } from "./config.js";
 import { buildExplorerTxUrl } from "./utils.js";
 import { getProvider } from "./wallet.js";
 
@@ -33,19 +33,22 @@ function extractTxHash(result) {
   return successStep?.txHash ?? "";
 }
 
-// Mirrors hooks/usePay.ts: `onStatus` receives the same PayStatus shapes
+// Mirrors hooks/usePay.ts, generalized to any from/to pair among the
+// supported chains: `onStatus` receives the same PayStatus shapes
 // ({state: 'pending'|'success'|'error', ...}) the React version rendered.
-export async function pay(recipient, amount, chainId, onStatus) {
-  if (!chainId) {
+// fromChainId === toChainId does a same-chain send; otherwise it bridges.
+export async function pay(recipient, amount, fromChainId, toChainId, onStatus) {
+  if (!fromChainId || !toChainId) {
     onStatus({ state: "error", message: "Wallet not connected." });
     return;
   }
 
-  const bridgeChainName = CHAIN_ID_TO_BRIDGE_CHAIN[chainId];
-  if (!bridgeChainName) {
+  const fromBridgeChainName = CHAIN_ID_TO_BRIDGE_CHAIN[fromChainId];
+  const toBridgeChainName = CHAIN_ID_TO_BRIDGE_CHAIN[toChainId];
+  if (!fromBridgeChainName || !toBridgeChainName) {
     onStatus({
       state: "error",
-      message: `Chain ID ${chainId} is not supported as a payment source. Switch to Ethereum Sepolia, Base Sepolia, Arbitrum Sepolia, or Avalanche Fuji.`,
+      message: "One of the selected chains isn't supported for payments.",
     });
     return;
   }
@@ -54,7 +57,8 @@ export async function pay(recipient, amount, chainId, onStatus) {
     onStatus({ state: "pending", message: "Connecting to wallet..." });
 
     const { BridgeChain, createViemAdapterFromProvider, supportedChains, kit } = await loadAppKit();
-    const sourceBridgeChain = BridgeChain[bridgeChainName];
+    const sourceBridgeChain = BridgeChain[fromBridgeChainName];
+    const destBridgeChain = BridgeChain[toBridgeChainName];
 
     const adapter = await createViemAdapterFromProvider({
       provider: getProvider(),
@@ -64,12 +68,12 @@ export async function pay(recipient, amount, chainId, onStatus) {
       },
     });
 
-    if (chainId === ARC_CHAIN_ID) {
-      // Already on Arc Testnet — use send (same-chain)
-      onStatus({ state: "pending", message: "Sending USDC on Arc Testnet..." });
+    if (fromChainId === toChainId) {
+      // Same chain on both ends — use send instead of bridge.
+      onStatus({ state: "pending", message: `Sending USDC on ${CHAIN_NAMES[fromChainId]}...` });
 
       const result = await kit.send({
-        from: { adapter, chain: BridgeChain.Arc_Testnet },
+        from: { adapter, chain: sourceBridgeChain },
         to: recipient,
         amount,
         token: "USDC",
@@ -79,19 +83,19 @@ export async function pay(recipient, amount, chainId, onStatus) {
       onStatus({
         state: "success",
         txHash,
-        explorerUrl: buildExplorerTxUrl(txHash),
+        explorerUrl: buildExplorerTxUrl(txHash, toChainId),
         amount,
         recipient,
       });
     } else {
-      // Cross-chain bridge to Arc Testnet with recipient address
+      // Cross-chain bridge from fromChainId to toChainId with recipient address.
       onStatus({ state: "pending", message: "Waiting for wallet approval..." });
 
       const result = await kit.bridge({
         from: { adapter, chain: sourceBridgeChain },
         to: {
           adapter,
-          chain: BridgeChain.Arc_Testnet,
+          chain: destBridgeChain,
           recipientAddress: recipient,
         },
         amount,
@@ -101,7 +105,7 @@ export async function pay(recipient, amount, chainId, onStatus) {
       onStatus({
         state: "success",
         txHash,
-        explorerUrl: buildExplorerTxUrl(txHash),
+        explorerUrl: buildExplorerTxUrl(txHash, toChainId),
         amount,
         recipient,
       });

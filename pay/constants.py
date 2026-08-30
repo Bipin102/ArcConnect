@@ -43,6 +43,40 @@ CHAIN_ID_TO_BRIDGE_CHAIN = {
     5042002: "Arc_Testnet",
 }
 
+# Public testnet block explorer base URL per chain, used to build tx links
+# regardless of which chain a bridge/swap actually lands on.
+CHAIN_EXPLORERS = {
+    11155111: "https://sepolia.etherscan.io",
+    84532: "https://sepolia.basescan.org",
+    421614: "https://sepolia.arbiscan.io",
+    43113: "https://testnet.snowtrace.io",
+    5042002: ARC_EXPLORER_URL,
+}
+
+# Public RPC endpoint per chain, so the client can read the connected
+# wallet's USDC balance on whichever chain it's currently on (not just Arc).
+# Verified live (correct eth_chainId) before use.
+CHAIN_RPC_URLS = {
+    11155111: "https://ethereum-sepolia-rpc.publicnode.com",
+    84532: "https://sepolia.base.org",
+    421614: "https://sepolia-rollup.arbitrum.io/rpc",
+    43113: "https://api.avax-test.network/ext/bc/C/rpc",
+    5042002: ARC_RPC_URL,
+}
+
+# Circle's official testnet USDC contract address per chain (6 decimals
+# everywhere except Arc's *native* gas USDC, which is 18 — see
+# NATIVE_USDC_DECIMALS). Verified against
+# https://developers.circle.com/stablecoins/usdc-contract-addresses and
+# sanity-checked live (decimals()/symbol() calls) before use.
+CHAIN_USDC_ADDRESSES = {
+    11155111: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+    84532: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    421614: "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
+    43113: "0x5425890298aed601595a70AB815c96711a31Bc65",
+    5042002: ARC_USDC_ADDRESS,
+}
+
 
 def as_config_dict():
     """Canonical config shipped to the client as JSON."""
@@ -57,4 +91,7 @@ def as_config_dict():
         "supportedSourceChainIds": SUPPORTED_SOURCE_CHAIN_IDS,
         "chainNames": CHAIN_NAMES,
         "chainIdToBridgeChain": CHAIN_ID_TO_BRIDGE_CHAIN,
+        "chainExplorers": CHAIN_EXPLORERS,
+        "chainRpcUrls": CHAIN_RPC_URLS,
+        "chainUsdcAddresses": CHAIN_USDC_ADDRESSES,
     }

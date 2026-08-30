@@ -3,11 +3,22 @@
 @source "../../templates/**/*.html";
 @source "../js/**/*.js";
 
+/* `light:` is a custom variant (not Tailwind's built-in `dark:`) because this
+   app was built dark-first — every existing utility class already encodes
+   the dark look, so it's the *light* theme that needs explicit opt-in
+   overrides, applied via `[data-theme="light"]` on <html> (see theme.js). */
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
 :root {
   --background: #050510;
   --foreground: #ededed;
   --font-geist-sans: "Geist", Arial, sans-serif;
   --font-geist-mono: "Geist Mono", monospace;
+}
+
+[data-theme="light"] {
+  --background: #f5f5fa;
+  --foreground: #16161d;
 }
 
 @theme inline {
@@ -23,39 +34,157 @@ body {
   font-family: var(--font-geist-sans), Arial, sans-serif;
 }
 
-/* Animated gradient background */
+/* Mostly neutral background — a single restrained magenta glow near the
+   hero, everything else kept dark/gray so magenta reads as an accent
+   instead of a wash of color. */
 .bg-mesh {
-  background-color: #050510;
+  background-color: var(--background);
   background-image:
-    radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 10%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+    radial-gradient(ellipse at 50% 5%, rgba(217, 70, 239, 0.12) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 85%, rgba(255, 255, 255, 0.03) 0%, transparent 45%),
+    radial-gradient(ellipse at 10% 90%, rgba(255, 255, 255, 0.02) 0%, transparent 35%);
+}
+[data-theme="light"] .bg-mesh {
+  background-image:
+    radial-gradient(ellipse at 50% 5%, rgba(217, 70, 239, 0.08) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 85%, rgba(0, 0, 0, 0.025) 0%, transparent 45%),
+    radial-gradient(ellipse at 10% 90%, rgba(0, 0, 0, 0.02) 0%, transparent 35%);
+}
+
+/* Faint technical grid, strongest near the hero, fading toward the footer */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 75% 55% at 50% 0%, black 25%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 55% at 50% 0%, black 25%, transparent 75%);
+}
+[data-theme="light"] .bg-grid {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
 }
 
 /* Glass card */
 .glass {
   background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+}
+[data-theme="light"] .glass {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04), inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Subtle ring around a card — mostly neutral with a faint magenta hint at
+   the top, layered via mask-composite so it never affects the card's own
+   background or padding. */
+.gradient-ring {
+  position: relative;
+}
+.gradient-ring::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(217, 70, 239, 0.4),
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(217, 70, 239, 0.4)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+[data-theme="light"] .gradient-ring::before {
+  background: linear-gradient(135deg, rgba(217, 70, 239, 0.35), rgba(0, 0, 0, 0.06) 50%, rgba(217, 70, 239, 0.35));
 }
 
 /* Input focus glow */
 input:focus {
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 3px rgba(217, 70, 239, 0.2);
 }
 
-/* Gradient button */
+/* Drop the native number spinner — reclaims space next to the chain picker
+   in the combined From/To rows, and isn't useful for a currency amount. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Solid, fully opaque dropdown/menu panel — deliberately not .glass, which is
+   too translucent for a floating panel and lets content behind it show
+   through. */
+.panel-solid {
+  background: #0c0c14;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.6);
+}
+[data-theme="light"] .panel-solid {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.18);
+}
+
+/* Gradient button, with a light sweep on hover */
 .btn-gradient {
-  background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
-  transition: opacity 0.2s, transform 0.1s;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #d946ef 0%, #ec4899 100%);
+  transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+.btn-gradient::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
 }
 .btn-gradient:hover:not(:disabled) {
-  opacity: 0.9;
+  opacity: 0.96;
   transform: translateY(-1px);
+  box-shadow: 0 10px 28px -6px rgba(217, 70, 239, 0.5);
+}
+.btn-gradient:hover:not(:disabled)::before {
+  left: 125%;
 }
 .btn-gradient:active:not(:disabled) {
   transform: translateY(0);
+}
+
+/* Slow-spinning conic ring behind the hero logo */
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.ring-spin {
+  animation: spin-slow 14s linear infinite;
+}
+
+/* Flowing gradient text for hero headline accents */
+@keyframes gradient-flow {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
+.gradient-text-flow {
+  background-size: 200% auto;
+  animation: gradient-flow 5s ease infinite;
 }
 
 /* Shimmer loader */

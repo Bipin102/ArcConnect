@@ -1,9 +1,9 @@
-import { ARC_RPC_URL, ARC_USDC_ADDRESS } from "./config.js";
+import { ARC_RPC_URL, ARC_USDC_ADDRESS, CHAIN_RPC_URLS, CHAIN_USDC_ADDRESSES } from "./config.js";
 
 let requestId = 0;
 
-async function rpcCall(method, params) {
-  const response = await fetch(ARC_RPC_URL, {
+async function rpcCall(rpcUrl, method, params) {
+  const response = await fetch(rpcUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", id: ++requestId, method, params }),
@@ -15,7 +15,7 @@ async function rpcCall(method, params) {
 
 // Native gas USDC balance on Arc Testnet (18 decimals)
 export async function getNativeBalance(address) {
-  const hex = await rpcCall("eth_getBalance", [address, "latest"]);
+  const hex = await rpcCall(ARC_RPC_URL, "eth_getBalance", [address, "latest"]);
   return BigInt(hex);
 }
 
@@ -28,8 +28,19 @@ function encodeBalanceOfCalldata(address) {
 
 // ERC-20 USDC balance on Arc Testnet (6 decimals)
 export async function getUsdcBalance(address) {
-  const hex = await rpcCall("eth_call", [
-    { to: ARC_USDC_ADDRESS, data: encodeBalanceOfCalldata(address) },
+  return getUsdcBalanceOnChain(null, address);
+}
+
+// ERC-20 USDC balance (6 decimals) on any of the app's supported chains —
+// used to show "Balance: X" for whichever chain is currently selected as
+// the bridge/swap source. Returns null if the chain isn't recognized.
+export async function getUsdcBalanceOnChain(chainId, address) {
+  const rpcUrl = chainId ? CHAIN_RPC_URLS[chainId] : ARC_RPC_URL;
+  const tokenAddress = chainId ? CHAIN_USDC_ADDRESSES[chainId] : ARC_USDC_ADDRESS;
+  if (!rpcUrl || !tokenAddress) return null;
+
+  const hex = await rpcCall(rpcUrl, "eth_call", [
+    { to: tokenAddress, data: encodeBalanceOfCalldata(address) },
     "latest",
   ]);
   if (!hex || hex === "0x") return 0n;
