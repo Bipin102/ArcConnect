@@ -5,9 +5,10 @@ import { shortenAddress } from '@/lib/utils'
 interface ExplorerLinkProps {
   txHash: string
   explorerUrl: string
+  label?: string
 }
 
-export function ExplorerLink({ txHash, explorerUrl }: ExplorerLinkProps) {
+export function ExplorerLink({ txHash, explorerUrl, label = 'Explorer' }: ExplorerLinkProps) {
   return (
     <a
       href={explorerUrl}
@@ -15,7 +16,7 @@ export function ExplorerLink({ txHash, explorerUrl }: ExplorerLinkProps) {
       rel="noopener noreferrer"
       className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-sm underline underline-offset-2 transition-colors"
     >
-      View on Arcscan: {shortenAddress(txHash)}
+      View on {label}: {shortenAddress(txHash)}
       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           strokeLinecap="round"

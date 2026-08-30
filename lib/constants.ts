@@ -34,3 +34,20 @@ export const CHAIN_NAMES: Record<number, string> = {
   43113: 'Avalanche Fuji',
   5042002: 'Arc Testnet',
 }
+
+// Public testnet block explorer base URLs (tx path appended by buildExplorerTxUrl)
+export const EXPLORER_BASE_URLS: Record<number, string> = {
+  11155111: 'https://sepolia.etherscan.io',
+  84532: 'https://sepolia.basescan.org',
+  421614: 'https://sepolia.arbiscan.io',
+  43113: 'https://testnet.snowtrace.io',
+  5042002: ARC_EXPLORER_URL,
+}
+
+export const EXPLORER_NAMES: Record<number, string> = {
+  11155111: 'Etherscan',
+  84532: 'Basescan',
+  421614: 'Arbiscan',
+  43113: 'Snowtrace',
+  5042002: 'Arcscan',
+}

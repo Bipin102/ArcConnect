@@ -1,5 +1,5 @@
 import { formatUnits } from 'viem'
-import { ERC20_USDC_DECIMALS, NATIVE_USDC_DECIMALS } from './constants'
+import { ERC20_USDC_DECIMALS, NATIVE_USDC_DECIMALS, ARC_CHAIN_ID, EXPLORER_BASE_URLS } from './constants'
 
 // Format ERC-20 USDC balance (6 decimals)
 export function formatUsdcBalance(raw: bigint): string {
@@ -21,9 +21,10 @@ export function shortenAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
-// Build Arcscan transaction URL
-export function buildExplorerTxUrl(txHash: string): string {
-  return `https://testnet.arcscan.app/tx/${txHash}`
+// Build a block explorer transaction URL for the given chain (defaults to Arc Testnet)
+export function buildExplorerTxUrl(txHash: string, chainId: number = ARC_CHAIN_ID): string {
+  const base = EXPLORER_BASE_URLS[chainId] ?? EXPLORER_BASE_URLS[ARC_CHAIN_ID]
+  return `${base}/tx/${txHash}`
 }
 
 // Map App Kit chain string to wagmi chain ID

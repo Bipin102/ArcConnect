@@ -3,6 +3,7 @@
 import { PayStatus } from '@/hooks/usePay'
 import { ExplorerLink } from './ExplorerLink'
 import { shortenAddress } from '@/lib/utils'
+import { CHAIN_NAMES, EXPLORER_NAMES } from '@/lib/constants'
 
 interface TxStatusProps {
   status: PayStatus
@@ -42,7 +43,9 @@ export function TxStatus({ status, onReset }: TxStatusProps) {
           </div>
           <div>
             <p className="text-sm font-semibold text-emerald-600">Payment Confirmed</p>
-            <p className="text-xs text-gray-400 mt-0.5">Successfully sent to Arc Testnet</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Successfully sent to {CHAIN_NAMES[status.destinationChainId] ?? 'destination chain'}
+            </p>
           </div>
         </div>
 
@@ -60,7 +63,11 @@ export function TxStatus({ status, onReset }: TxStatusProps) {
 
         {status.txHash && (
           <div className="mb-4">
-            <ExplorerLink txHash={status.txHash} explorerUrl={status.explorerUrl} />
+            <ExplorerLink
+              txHash={status.txHash}
+              explorerUrl={status.explorerUrl}
+              label={EXPLORER_NAMES[status.destinationChainId] ?? 'Explorer'}
+            />
           </div>
         )}
 

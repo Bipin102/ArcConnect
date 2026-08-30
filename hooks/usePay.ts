@@ -12,11 +12,12 @@ import {
   AvalancheFuji,
 } from '@circle-fin/app-kit/chains'
 import { buildExplorerTxUrl } from '@/lib/utils'
+import { CHAIN_NAMES } from '@/lib/constants'
 
 export type PayStatus =
   | { state: 'idle' }
   | { state: 'pending'; message: string }
-  | { state: 'success'; txHash: string; explorerUrl: string; amount: string; recipient: string }
+  | { state: 'success'; txHash: string; explorerUrl: string; amount: string; recipient: string; destinationChainId: number }
   | { state: 'error'; message: string }
 
 const SUPPORTED_SOURCE_CHAINS = [
@@ -49,18 +50,23 @@ export function usePay() {
   const [status, setStatus] = useState<PayStatus>({ state: 'idle' })
 
   const pay = useCallback(
-    async (recipient: string, amount: string) => {
+    async (recipient: string, amount: string, destinationChainId: number) => {
       if (!connector || !chainId) {
         setStatus({ state: 'error', message: 'Wallet not connected.' })
         return
       }
 
       const sourceBridgeChain = CHAIN_ID_TO_BRIDGE_CHAIN[chainId]
+      const destBridgeChain = CHAIN_ID_TO_BRIDGE_CHAIN[destinationChainId]
       if (!sourceBridgeChain) {
         setStatus({
           state: 'error',
-          message: `Chain ID ${chainId} is not supported as a payment source. Switch to Ethereum Sepolia, Base Sepolia, Arbitrum Sepolia, or Avalanche Fuji.`,
+          message: `Chain ID ${chainId} is not a supported network. Switch your wallet to a supported chain.`,
         })
+        return
+      }
+      if (!destBridgeChain) {
+        setStatus({ state: 'error', message: `Destination chain ID ${destinationChainId} is not supported.` })
         return
       }
 
@@ -76,12 +82,12 @@ export function usePay() {
           },
         })
 
-        if (chainId === 5042002) {
-          // Already on Arc Testnet — use send (same-chain)
-          setStatus({ state: 'pending', message: 'Sending USDC on Arc Testnet...' })
+        if (chainId === destinationChainId) {
+          // Same chain on both sides — use send instead of bridge
+          setStatus({ state: 'pending', message: `Sending USDC on ${CHAIN_NAMES[chainId] ?? 'chain'}...` })
 
           const result = await kit.send({
-            from: { adapter, chain: BridgeChain.Arc_Testnet },
+            from: { adapter, chain: sourceBridgeChain },
             to: recipient,
             amount,
             token: 'USDC',
@@ -91,19 +97,20 @@ export function usePay() {
           setStatus({
             state: 'success',
             txHash,
-            explorerUrl: buildExplorerTxUrl(txHash),
+            explorerUrl: buildExplorerTxUrl(txHash, destinationChainId),
             amount,
             recipient,
+            destinationChainId,
           })
         } else {
-          // Cross-chain bridge to Arc Testnet with recipient address
+          // Cross-chain bridge to the selected destination with recipient address
           setStatus({ state: 'pending', message: 'Waiting for wallet approval...' })
 
           const result = await kit.bridge({
             from: { adapter, chain: sourceBridgeChain },
             to: {
               adapter,
-              chain: BridgeChain.Arc_Testnet,
+              chain: destBridgeChain,
               recipientAddress: recipient,
             },
             amount,
@@ -113,9 +120,10 @@ export function usePay() {
           setStatus({
             state: 'success',
             txHash,
-            explorerUrl: buildExplorerTxUrl(txHash),
+            explorerUrl: buildExplorerTxUrl(txHash, destinationChainId),
             amount,
             recipient,
+            destinationChainId,
           })
         }
       } catch (err: unknown) {
