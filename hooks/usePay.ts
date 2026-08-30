@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useAccount } from 'wagmi'
-import { AppKit, BridgeChain, type BridgeResult } from '@circle-fin/app-kit'
+import { AppKit, BridgeChain, type BridgeResult, type BridgeStep } from '@circle-fin/app-kit'
 import { createViemAdapterFromProvider } from '@circle-fin/adapter-viem-v2'
 import {
   ArcTestnet,
@@ -68,7 +68,11 @@ function attachBridgeProgressListeners(
   }
   const onMint = (payload: BridgeStepPayload) => {
     if (payload.values.state === 'pending') {
-      setMessage(`Switching to ${destChainName} — approve the final step in your wallet to complete the transfer...`)
+      setMessage(
+        sourceChainName === destChainName
+          ? `Confirming the final step in your wallet to complete the transfer on ${destChainName}...`
+          : `Switching to ${destChainName} — approve the final step in your wallet to complete the transfer...`,
+      )
     }
   }
 
@@ -123,15 +127,28 @@ export function usePay() {
         })
 
         if (chainId === destinationChainId) {
-          // Same chain on both sides — use send instead of bridge
-          setStatus({ state: 'pending', message: `Sending USDC on ${CHAIN_NAMES[chainId] ?? 'chain'}...` })
+          // Same chain on both sides. Circle's SDK still routes USDC "send"
+          // through the same CCTP machinery under the hood (burn then mint on
+          // the same chain), so this can still prompt for a second signature
+          // partway through — surface that instead of leaving it unexplained.
+          const chainName = CHAIN_NAMES[chainId] ?? 'chain'
+          setStatus({ state: 'pending', message: `Sending USDC on ${chainName}...` })
 
-          const result = await kit.send({
-            from: { adapter, chain: sourceBridgeChain },
-            to: recipient,
-            amount,
-            token: 'USDC',
-          })
+          const detachListeners = attachBridgeProgressListeners(chainName, chainName, (message) =>
+            setStatus({ state: 'pending', message }),
+          )
+
+          let result: BridgeStep
+          try {
+            result = await kit.send({
+              from: { adapter, chain: sourceBridgeChain },
+              to: recipient,
+              amount,
+              token: 'USDC',
+            })
+          } finally {
+            detachListeners()
+          }
 
           const txHash = result?.txHash ?? ''
           setStatus({
