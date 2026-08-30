@@ -2,6 +2,7 @@ import {
   ARC_CHAIN_ID,
   ARC_FAUCET_URL,
   CHAIN_NAMES,
+  CHAIN_NATIVE_SYMBOLS,
   SUPPORTED_SOURCE_CHAIN_IDS,
   ALL_SUPPORTED_CHAIN_IDS,
 } from "./config.js";
@@ -254,63 +255,6 @@ export function renderNetworkGuard(el, state, handlers) {
   });
 }
 
-export function renderBalanceDisplay(el, state) {
-  if (!state.address) {
-    el.innerHTML = "";
-    return;
-  }
-
-  const hasGas = state.gas.raw > 0n;
-  const gasValue = state.gas.isLoading
-    ? `<span class="shimmer inline-block w-16 h-4 rounded"></span>`
-    : state.gas.formatted;
-  const usdcValue = state.usdc.isLoading
-    ? `<span class="shimmer inline-block w-16 h-4 rounded"></span>`
-    : state.usdc.formatted;
-
-  el.innerHTML = `
-    <div class="glass rounded-2xl p-4 mb-4 fade-in">
-      <div class="flex items-center justify-between mb-3">
-        <p class="text-xs font-medium text-gray-500 light:text-gray-600 uppercase tracking-widest">
-          Arc Testnet Balances
-        </p>
-        ${
-          !hasGas
-            ? `<a href="${ARC_FAUCET_URL}" target="_blank" rel="noopener noreferrer" class="text-xs text-gray-400 light:text-gray-600 hover:text-gray-200 light:hover:text-gray-800 transition-colors flex items-center gap-1">
-                Get testnet USDC
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </a>`
-            : ""
-        }
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div class="relative bg-white/3 light:bg-black/4 border-l-2 ${hasGas ? "border-emerald-500/50" : "border-red-500/40"} rounded-xl p-3 overflow-hidden">
-          <div class="flex items-center gap-1.5 mb-1.5">
-            <svg class="w-3 h-3 text-gray-600 light:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 21H5a2 2 0 01-2-2V5a2 2 0 012-2h5.5M11 21l5-5m-5 5v-5h5m0 0V9a2 2 0 00-2-2h-1" />
-            </svg>
-            <p class="text-xs text-gray-600 light:text-gray-400">Gas USDC</p>
-          </div>
-          <p class="text-base font-semibold font-mono tabular-nums ${hasGas ? "text-emerald-400" : "text-red-400"}">${gasValue}</p>
-          <p class="text-xs text-gray-700 light:text-gray-300 mt-0.5">native · 18 dec</p>
-        </div>
-        <div class="relative bg-white/3 light:bg-black/4 border-l-2 ${state.usdc.raw > 0n ? "border-emerald-500/50" : "border-white/10 light:border-black/10"} rounded-xl p-3 overflow-hidden">
-          <div class="flex items-center gap-1.5 mb-1.5">
-            <svg class="w-3 h-3 text-gray-600 light:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .672-3 1.5S10.343 11 12 11s3 .672 3 1.5-1.343 1.5-3 1.5m0-6c1.11 0 2.08.402 2.599 1M12 8V6.5M12 15v1.5m0-9C8.686 7.5 6 9.567 6 12s2.686 4.5 6 4.5 6-2.067 6-4.5-2.686-4.5-6-4.5z" />
-            </svg>
-            <p class="text-xs text-gray-600 light:text-gray-400">ERC-20 USDC</p>
-          </div>
-          <p class="text-base font-semibold font-mono tabular-nums ${state.usdc.raw > 0n ? "text-emerald-400" : "text-gray-500 light:text-gray-600"}">${usdcValue}</p>
-          <p class="text-xs text-gray-700 light:text-gray-300 mt-0.5">token · 6 dec</p>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
 export function renderXpDisplay(el, state) {
   if (!state.address) {
     el.innerHTML = "";
@@ -416,16 +360,20 @@ export function renderPaymentForm(el, state, handlers) {
   // to the current chain — that combination isn't offered in the picker).
   const toChainId = mode === "swap" ? state.chainId : state.toChainId;
   const toChainName = toChainId ? (CHAIN_NAMES[toChainId] ?? `Chain ${toChainId}`) : "—";
-  const canSubmit = isSupportedChain && (mode === "swap" || (toChainId && toChainId !== state.chainId));
 
+  // Section title (tracks the active mode) on the left, a compact Bridge/Swap
+  // switcher on the right — instead of two full-width pill tabs.
   const modeTabs = `
-    <div class="flex gap-1 p-1 bg-white/3 light:bg-black/4 border border-white/8 light:border-black/10 rounded-xl">
-      <button type="button" data-mode="bridge" class="flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${mode === "bridge" ? "bg-fuchsia-500/15 text-fuchsia-300 border border-fuchsia-500/30" : "text-gray-500 light:text-gray-600 hover:text-gray-300 light:hover:text-gray-700 border border-transparent"}">
-        Bridge
-      </button>
-      <button type="button" data-mode="swap" class="flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${mode === "swap" ? "bg-fuchsia-500/15 text-fuchsia-300 border border-fuchsia-500/30" : "text-gray-500 light:text-gray-600 hover:text-gray-300 light:hover:text-gray-700 border border-transparent"}">
-        Swap
-      </button>
+    <div class="flex items-center justify-between">
+      <span class="text-sm font-semibold text-white light:text-gray-900">${mode === "bridge" ? "Bridge" : "Swap"}</span>
+      <div class="flex gap-0.5 p-0.5 bg-white/3 light:bg-black/4 border border-white/8 light:border-black/10 rounded-lg">
+        <button type="button" data-mode="bridge" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${mode === "bridge" ? "bg-fuchsia-500/15 text-fuchsia-300 border border-fuchsia-500/30" : "text-gray-500 light:text-gray-600 hover:text-gray-300 light:hover:text-gray-700 border border-transparent"}">
+          Bridge
+        </button>
+        <button type="button" data-mode="swap" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${mode === "swap" ? "bg-fuchsia-500/15 text-fuchsia-300 border border-fuchsia-500/30" : "text-gray-500 light:text-gray-600 hover:text-gray-300 light:hover:text-gray-700 border border-transparent"}">
+          Swap
+        </button>
+      </div>
     </div>
   `;
 
@@ -517,44 +465,100 @@ export function renderPaymentForm(el, state, handlers) {
     <div data-error="recipient">${errorMarkup(state.formErrors.recipient)}</div>
   `;
 
-  // Swap mode: no second chain to pick, so recipient is just its own field.
-  const recipientBox = `
-    <div class="bg-white/3 light:bg-black/4 border border-white/8 light:border-black/10 focus-within:border-fuchsia-500/40 rounded-xl p-3 transition-colors">
-      <span class="text-[10px] text-gray-600 light:text-gray-400 uppercase tracking-widest font-semibold block mb-2">Recipient · ${toChainName}</span>
-      <input
-        type="text"
-        name="recipient"
-        data-field="recipient"
-        value="${state.recipient ?? ""}"
-        placeholder="0x0000...0000"
-        ${isPending ? "disabled" : ""}
-        class="w-full bg-transparent text-sm font-mono text-gray-100 light:text-gray-900 placeholder-gray-700 light:placeholder-gray-300 outline-none disabled:opacity-40"
-      />
+  // Swap always trades the connected chain's native gas token for USDC (the
+  // one pair guaranteed to exist everywhere), always to your own wallet —
+  // real swaps don't take a recipient. Not offered on Arc: its native gas
+  // token already *is* USDC, so there's nothing to convert.
+  const nativeSymbol = state.chainId ? (CHAIN_NATIVE_SYMBOLS[state.chainId] ?? "NATIVE") : "NATIVE";
+  const swapTokenOut = state.swapTokenIn === "NATIVE" ? "USDC" : "NATIVE";
+  const payTokenLabel = state.swapTokenIn === "NATIVE" ? nativeSymbol : "USDC";
+  const receiveTokenLabel = swapTokenOut === "NATIVE" ? nativeSymbol : "USDC";
+  const isOnArc = state.chainId === ARC_CHAIN_ID;
+  const swapEligible = isSupportedChain && !isOnArc;
+  const canSubmit =
+    mode === "swap" ? swapEligible : isSupportedChain && toChainId && toChainId !== state.chainId;
+
+  const networkRow = `
+    <div class="bg-white/3 light:bg-black/4 border border-white/8 light:border-black/10 rounded-xl p-3">
+      <span class="text-[10px] text-gray-600 light:text-gray-400 uppercase tracking-widest font-semibold block mb-2">Network</span>
+      ${fromPicker}
     </div>
-    <div data-error="recipient">${errorMarkup(state.formErrors.recipient)}</div>
+  `;
+
+  const payTokenToggle = `
+    <div class="flex gap-0.5 p-0.5 bg-white/5 light:bg-black/5 border border-white/10 light:border-black/10 rounded-lg flex-shrink-0">
+      <button type="button" data-swap-token="NATIVE" ${isPending ? "disabled" : ""} class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${state.swapTokenIn === "NATIVE" ? "bg-fuchsia-500/15 text-fuchsia-300" : "text-gray-500 light:text-gray-600 hover:text-gray-300 light:hover:text-gray-700"}">${nativeSymbol}</button>
+      <button type="button" data-swap-token="USDC" ${isPending ? "disabled" : ""} class="px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${state.swapTokenIn === "USDC" ? "bg-fuchsia-500/15 text-fuchsia-300" : "text-gray-500 light:text-gray-600 hover:text-gray-300 light:hover:text-gray-700"}">USDC</button>
+    </div>
+  `;
+
+  const swapPayRow = `
+    <div class="bg-white/3 light:bg-black/4 border border-white/8 light:border-black/10 focus-within:border-fuchsia-500/40 rounded-xl p-3 transition-colors">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[10px] text-gray-600 light:text-gray-400 uppercase tracking-widest font-semibold">You Pay</span>
+        <span class="text-[10px] text-gray-600 light:text-gray-400">
+          Balance: ${state.fromBalance.isLoading ? "…" : state.fromBalance.formatted}
+        </span>
+      </div>
+      <div class="flex items-center justify-between gap-3">
+        ${payTokenToggle}
+        <input
+          type="number"
+          name="amount"
+          data-field="amount"
+          value="${state.amount ?? ""}"
+          placeholder="0.00"
+          min="0"
+          step="0.000001"
+          ${isPending ? "disabled" : ""}
+          class="flex-1 min-w-0 bg-transparent text-right text-xl font-semibold text-white light:text-gray-900 placeholder-gray-700 light:placeholder-gray-300 outline-none disabled:opacity-40"
+        />
+      </div>
+      ${
+        !state.fromBalance.isLoading && state.fromBalance.raw > 0n
+          ? `<div class="flex justify-end mt-1.5">
+              <button type="button" data-action="max-amount" ${isPending ? "disabled" : ""} class="text-[11px] font-semibold text-fuchsia-400 hover:text-fuchsia-300 transition-colors disabled:opacity-40">MAX</button>
+            </div>`
+          : ""
+      }
+    </div>
+    <div data-error="amount">${errorMarkup(state.formErrors.amount)}</div>
+  `;
+
+  const swapReceiveRow = `
+    <div class="bg-white/3 light:bg-black/4 border border-white/8 light:border-black/10 rounded-xl p-3">
+      <span class="text-[10px] text-gray-600 light:text-gray-400 uppercase tracking-widest font-semibold block mb-2">You Receive (estimated)</span>
+      <div class="flex items-center justify-between gap-3">
+        <span class="text-sm font-medium text-gray-200 light:text-gray-800">${receiveTokenLabel}</span>
+        <span class="text-right text-xl font-semibold ${state.swapEstimate.amount ? "text-white light:text-gray-900" : "text-gray-700 light:text-gray-300"}">
+          ${
+            state.swapEstimate.loading
+              ? `<span class="shimmer inline-block w-16 h-5 rounded"></span>`
+              : state.swapEstimate.amount
+                ? `~${Number(state.swapEstimate.amount).toLocaleString(undefined, { maximumFractionDigits: 6 })}`
+                : "0.00"
+          }
+        </span>
+      </div>
+    </div>
+  `;
+
+  const swapUnavailableOnArc = `
+    <div class="bg-white/5 light:bg-black/5 border border-white/10 light:border-black/10 rounded-xl px-3 py-2.5 text-center">
+      <p class="text-xs text-gray-400 light:text-gray-600">Arc's gas token is already USDC — there's nothing to swap. Pick a different chain above to swap ETH/AVAX for USDC, or use Bridge instead.</p>
+    </div>
   `;
 
   const payForm = `
     <form data-form="pay" class="space-y-3">
-      ${fromRow}
-
       ${
         mode === "bridge"
-          ? `${flipButton}${toRow}`
-          : `${
-              isSupportedChain
-                ? `<div class="flex items-center gap-2 bg-white/5 light:bg-black/5 border border-white/10 light:border-black/10 rounded-xl px-3 py-2.5">
-                    <svg class="w-4 h-4 text-gray-400 light:text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="text-xs text-gray-400 light:text-gray-600">On ${toChainName} — sending same-chain USDC.</p>
-                  </div>`
-                : ""
-            }${recipientBox}`
+          ? `${fromRow}${flipButton}${toRow}`
+          : `${networkRow}${swapEligible ? `${swapPayRow}${swapReceiveRow}` : isSupportedChain ? swapUnavailableOnArc : ""}`
       }
 
       <p class="text-[11px] text-gray-600 light:text-gray-400 text-center">
-        ${mode === "swap" ? "Instant · same-chain transfer" : "Est. arrival 1–3 min · Circle CCTP"}
+        ${mode === "swap" ? "Instant · same-chain swap" : "Est. arrival 1–3 min · Circle CCTP"}
       </p>
 
       <button
@@ -568,7 +572,9 @@ export function renderPaymentForm(el, state, handlers) {
             : !isSupportedChain
               ? "Unsupported Network"
               : mode === "swap"
-                ? `<span class="flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4" /></svg> Swap USDC</span>`
+                ? swapEligible
+                  ? `<span class="flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4" /></svg> Swap ${payTokenLabel} for ${receiveTokenLabel}</span>`
+                  : "Pick a Different Chain"
                 : `<span class="flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> Bridge to ${toChainName}</span>`
         }
       </button>
@@ -615,10 +621,15 @@ export function renderPaymentForm(el, state, handlers) {
   const form = el.querySelector('[data-form="pay"]');
   if (form) {
     form.addEventListener("submit", handlers.onSubmit);
-    form.querySelector('[data-field="recipient"]').addEventListener("input", handlers.onRecipientInput);
-    form.querySelector('[data-field="amount"]').addEventListener("input", handlers.onAmountInput);
+    const recipientField = form.querySelector('[data-field="recipient"]');
+    if (recipientField) recipientField.addEventListener("input", handlers.onRecipientInput);
+    const amountField = form.querySelector('[data-field="amount"]');
+    if (amountField) amountField.addEventListener("input", handlers.onAmountInput);
     const maxBtn = form.querySelector('[data-action="max-amount"]');
     if (maxBtn) maxBtn.addEventListener("click", handlers.onMaxAmount);
+    form.querySelectorAll("[data-swap-token]").forEach((btn) => {
+      btn.addEventListener("click", () => handlers.onSelectSwapToken(btn.dataset.swapToken));
+    });
   }
 }
 
@@ -631,6 +642,7 @@ export function renderTxStatus(el, state, handlers) {
   }
 
   if (status.state === "pending") {
+    const isSwap = state.mode === "swap";
     el.innerHTML = `
       <div class="glass rounded-2xl p-5 border border-fuchsia-500/20 fade-in">
         <div class="flex items-center gap-3 mb-3">
@@ -639,7 +651,7 @@ export function renderTxStatus(el, state, handlers) {
           </div>
           <div>
             <p class="text-sm font-medium text-white light:text-gray-900">${status.message}</p>
-            <p class="text-xs text-gray-600 light:text-gray-400 mt-0.5">Cross-chain transfers take 1–3 minutes.</p>
+            <p class="text-xs text-gray-600 light:text-gray-400 mt-0.5">${isSwap ? "Same-chain swaps usually confirm in seconds." : "Cross-chain transfers take 1–3 minutes."}</p>
           </div>
         </div>
         <div class="h-1 rounded-full bg-white/5 light:bg-black/5 overflow-hidden">
@@ -651,6 +663,27 @@ export function renderTxStatus(el, state, handlers) {
   }
 
   if (status.state === "success") {
+    const isSwap = status.tokenIn !== undefined;
+    const detailRows = isSwap
+      ? `<div class="flex justify-between items-center">
+          <span class="text-xs text-gray-600 light:text-gray-400">You Paid</span>
+          <span class="text-sm font-semibold font-mono text-white light:text-gray-900">${status.amountIn} ${status.tokenIn}</span>
+        </div>
+        <div class="h-px bg-white/5 light:bg-black/5"></div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-600 light:text-gray-400">You Received</span>
+          <span class="text-sm font-semibold font-mono text-emerald-400">${status.amountOut ? `~${status.amountOut}` : "—"} ${status.tokenOut}</span>
+        </div>`
+      : `<div class="flex justify-between items-center">
+          <span class="text-xs text-gray-600 light:text-gray-400">Amount</span>
+          <span class="text-sm font-semibold font-mono text-white light:text-gray-900">${status.amount} USDC</span>
+        </div>
+        <div class="h-px bg-white/5 light:bg-black/5"></div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-600 light:text-gray-400">Recipient</span>
+          <span class="text-sm font-mono text-gray-300 light:text-gray-700">${shortenAddress(status.recipient)}</span>
+        </div>`;
+
     el.innerHTML = `
       <div class="glass rounded-2xl p-5 border border-emerald-500/20 fade-in">
         <div class="flex items-center gap-3 mb-4">
@@ -660,28 +693,20 @@ export function renderTxStatus(el, state, handlers) {
             </svg>
           </div>
           <div>
-            <p class="text-sm font-semibold text-emerald-400">Payment Confirmed</p>
-            <p class="text-xs text-gray-500 light:text-gray-600 mt-0.5">Successfully sent to Arc Testnet</p>
+            <p class="text-sm font-semibold text-emerald-400">${isSwap ? "Swap Complete" : "Payment Confirmed"}</p>
+            <p class="text-xs text-gray-500 light:text-gray-600 mt-0.5">${isSwap ? "Successfully swapped" : "Successfully sent to Arc Testnet"}</p>
           </div>
         </div>
 
         <div class="bg-white/3 light:bg-black/4 rounded-xl p-3 space-y-2 mb-4">
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-gray-600 light:text-gray-400">Amount</span>
-            <span class="text-sm font-semibold font-mono text-white light:text-gray-900">${status.amount} USDC</span>
-          </div>
-          <div class="h-px bg-white/5 light:bg-black/5"></div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-gray-600 light:text-gray-400">Recipient</span>
-            <span class="text-sm font-mono text-gray-300 light:text-gray-700">${shortenAddress(status.recipient)}</span>
-          </div>
+          ${detailRows}
         </div>
 
         ${
           status.txHash
             ? `<div class="mb-4">
                 <a href="${status.explorerUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-fuchsia-400 hover:text-fuchsia-300 text-sm underline underline-offset-2 transition-colors">
-                  View on Arcscan: ${shortenAddress(status.txHash)}
+                  View transaction: ${shortenAddress(status.txHash)}
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
@@ -691,7 +716,7 @@ export function renderTxStatus(el, state, handlers) {
         }
 
         <button data-action="reset" class="w-full text-sm text-gray-500 light:text-gray-600 hover:text-white light:hover:text-gray-900 transition-colors py-2 border border-white/5 light:border-black/8 hover:border-white/10 light:hover:border-black/15 rounded-xl">
-          Make another payment
+          ${isSwap ? "Make another swap" : "Make another payment"}
         </button>
       </div>
     `;

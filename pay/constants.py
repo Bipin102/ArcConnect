@@ -77,6 +77,17 @@ CHAIN_USDC_ADDRESSES = {
     5042002: ARC_USDC_ADDRESS,
 }
 
+# Native gas token symbol per chain. Arc's native token *is* USDC (same asset
+# as ARC_USDC_ADDRESS, just 18 vs 6 decimals — see NATIVE_USDC_DECIMALS), so
+# there's nothing to swap on Arc; the other four are real ETH/AVAX ⇄ USDC pairs.
+CHAIN_NATIVE_SYMBOLS = {
+    11155111: "ETH",
+    84532: "ETH",
+    421614: "ETH",
+    43113: "AVAX",
+    5042002: "USDC",
+}
+
 
 def as_config_dict():
     """Canonical config shipped to the client as JSON."""
@@ -94,4 +105,5 @@ def as_config_dict():
         "chainExplorers": CHAIN_EXPLORERS,
         "chainRpcUrls": CHAIN_RPC_URLS,
         "chainUsdcAddresses": CHAIN_USDC_ADDRESSES,
+        "chainNativeSymbols": CHAIN_NATIVE_SYMBOLS,
     }

@@ -37,6 +37,12 @@ export function formatUsdcAmountPlain(raw) {
   return formatUnits(raw, ERC20_USDC_DECIMALS);
 }
 
+// Plain native-token amount (ETH/AVAX/etc., 18 decimals) — same MAX-fill use
+// case as formatUsdcAmountPlain above.
+export function formatNativeAmountPlain(raw) {
+  return formatUnits(raw, NATIVE_USDC_DECIMALS);
+}
+
 // Truncate an address for display: 0x1234...abcd
 export function shortenAddress(address) {
   if (!address || address.length < 10) return address;

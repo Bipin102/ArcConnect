@@ -7,17 +7,22 @@ import {
   onAccountsChanged,
   onChainChanged,
 } from "./wallet.js";
-import { getNativeBalance, getUsdcBalance, getUsdcBalanceOnChain } from "./rpc.js";
-import { formatNativeUsdcBalance, formatUsdcBalance, formatUsdcAmountPlain, isAddress } from "./utils.js";
+import { getNativeBalance, getUsdcBalance, getUsdcBalanceOnChain, getNativeBalanceOnChain } from "./rpc.js";
+import {
+  formatNativeUsdcBalance,
+  formatUsdcBalance,
+  formatUsdcAmountPlain,
+  formatNativeAmountPlain,
+  isAddress,
+} from "./utils.js";
 import { ARC_CHAIN_ID, ALL_SUPPORTED_CHAIN_IDS } from "./config.js";
-import { pay } from "./pay.js";
+import { bridge, swap, estimateSwap } from "./pay.js";
 import { fetchActivity, recordActivity } from "./xp.js";
 import { getTheme, toggleTheme } from "./theme.js";
 import {
   renderConnectButton,
   updateConnectButtonBalances,
   renderNetworkGuard,
-  renderBalanceDisplay,
   renderXpDisplay,
   renderPaymentForm,
   renderTxStatus,
@@ -26,7 +31,6 @@ import {
 const el = {
   connectButton: document.getElementById("connect-button"),
   networkGuard: document.getElementById("network-guard"),
-  balanceDisplay: document.getElementById("balance-display"),
   xpDisplay: document.getElementById("xp-display"),
   paymentForm: document.getElementById("payment-form"),
   txStatus: document.getElementById("tx-status"),
@@ -42,15 +46,20 @@ const state = {
   switching: false,
   gas: { ...emptyBalance },
   usdc: { ...emptyBalance },
-  // USDC balance on whichever chain is currently selected as the bridge/swap
-  // source — shown next to the amount field with a MAX shortcut. Distinct
-  // from `usdc` above, which is always Arc's balance regardless of mode.
+  // Balance of whatever token is currently being paid with: USDC for
+  // Bridge, or USDC/native gas token for Swap (see swapTokenIn). Distinct
+  // from `usdc`/`gas` above, which are always Arc's own balances.
   fromBalance: { ...emptyBalance },
   mode: "bridge",
   // Independently-selected bridge destination (swap mode always targets
   // whatever chain the wallet is currently on instead). Defaults to Arc,
   // ArcConnect's original purpose, but any supported chain can be picked.
   toChainId: ARC_CHAIN_ID,
+  // Swap always trades between a chain's native gas token and USDC — the one
+  // pair guaranteed to exist everywhere (see pay/constants.py CHAIN_NATIVE_SYMBOLS).
+  // Not offered on Arc: its native gas token already *is* USDC.
+  swapTokenIn: "NATIVE",
+  swapEstimate: { loading: false, amount: null, token: null },
   recipient: "",
   amount: "",
   formErrors: {},
@@ -62,7 +71,6 @@ const state = {
 function renderAll() {
   renderConnectButton(el.connectButton, state, handlers);
   renderNetworkGuard(el.networkGuard, state, handlers);
-  renderBalanceDisplay(el.balanceDisplay, state);
   renderXpDisplay(el.xpDisplay, state);
   renderPaymentForm(el.paymentForm, state, handlers);
   renderTxStatus(el.txStatus, state, handlers);
@@ -88,18 +96,19 @@ async function refreshXp() {
   }
 }
 
+// Arc balances aren't shown as their own card anymore — they live in the
+// account dropdown (see updateConnectButtonBalances) — but are still fetched
+// here since that's their only consumer now.
 async function refreshBalances() {
   if (!state.address) {
     state.gas = { ...emptyBalance };
     state.usdc = { ...emptyBalance };
-    renderBalanceDisplay(el.balanceDisplay, state);
     updateConnectButtonBalances(el.connectButton, state);
     return;
   }
 
   state.gas = { ...state.gas, isLoading: true };
   state.usdc = { ...state.usdc, isLoading: true };
-  renderBalanceDisplay(el.balanceDisplay, state);
   updateConnectButtonBalances(el.connectButton, state);
 
   try {
@@ -114,10 +123,12 @@ async function refreshBalances() {
     state.gas = { ...state.gas, isLoading: false };
     state.usdc = { ...state.usdc, isLoading: false };
   }
-  renderBalanceDisplay(el.balanceDisplay, state);
   updateConnectButtonBalances(el.connectButton, state);
 }
 
+// Balance of whichever token is currently relevant to pay with (see
+// state.fromBalance doc comment above) — USDC for Bridge, USDC or native
+// for Swap depending on swapTokenIn.
 async function refreshFromBalance() {
   if (!state.address || !state.chainId) {
     state.fromBalance = { ...emptyBalance };
@@ -125,15 +136,21 @@ async function refreshFromBalance() {
     return;
   }
 
+  const wantsNative = state.mode === "swap" && state.swapTokenIn === "NATIVE";
+
   state.fromBalance = { ...state.fromBalance, isLoading: true };
   renderPaymentForm(el.paymentForm, state, handlers);
 
   try {
-    const raw = await getUsdcBalanceOnChain(state.chainId, state.address);
+    const raw = wantsNative
+      ? await getNativeBalanceOnChain(state.chainId, state.address)
+      : await getUsdcBalanceOnChain(state.chainId, state.address);
     state.fromBalance =
-      raw !== null ? { raw, formatted: formatUsdcBalance(raw), isLoading: false } : { ...emptyBalance };
+      raw !== null
+        ? { raw, formatted: wantsNative ? formatNativeUsdcBalance(raw) : formatUsdcBalance(raw), isLoading: false }
+        : { ...emptyBalance };
   } catch (err) {
-    console.error("Failed to load source-chain USDC balance:", err);
+    console.error("Failed to load source-chain balance:", err);
     state.fromBalance = { ...state.fromBalance, isLoading: false };
   }
   renderPaymentForm(el.paymentForm, state, handlers);
@@ -147,9 +164,57 @@ function ensureValidToChain() {
   state.toChainId = ALL_SUPPORTED_CHAIN_IDS.find((id) => id !== state.chainId) ?? null;
 }
 
+let estimateTimer = null;
+
+// Debounced live "you receive ~X" quote for the swap form. Swallows errors —
+// an estimate is a nice-to-have preview, not something worth surfacing as a
+// hard failure (the actual swap call will fail loudly if something's wrong).
+function scheduleSwapEstimate() {
+  clearTimeout(estimateTimer);
+  const amount = parseFloat(state.amount);
+  const eligible = state.mode === "swap" && state.chainId && state.chainId !== ARC_CHAIN_ID && amount > 0;
+
+  if (!eligible) {
+    state.swapEstimate = { loading: false, amount: null, token: null };
+    renderPaymentForm(el.paymentForm, state, handlers);
+    return;
+  }
+
+  state.swapEstimate = { ...state.swapEstimate, loading: true };
+  renderPaymentForm(el.paymentForm, state, handlers);
+
+  const chainId = state.chainId;
+  const tokenIn = state.swapTokenIn;
+  const tokenOut = tokenIn === "NATIVE" ? "USDC" : "NATIVE";
+  const amountIn = state.amount;
+
+  estimateTimer = setTimeout(async () => {
+    const stillCurrent = () =>
+      state.mode === "swap" && state.chainId === chainId && state.swapTokenIn === tokenIn && state.amount === amountIn;
+
+    try {
+      // estimateSwap() calls a real external quote service — guard against it
+      // hanging (rather than cleanly failing) and leaving the UI stuck loading.
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Estimate timed out")), 8000));
+      const output = await Promise.race([estimateSwap(chainId, tokenIn, tokenOut, amountIn), timeout]);
+      if (!stillCurrent()) return; // a newer input/selection has since superseded this request
+      state.swapEstimate = output
+        ? { loading: false, amount: output.amount, token: output.token }
+        : { loading: false, amount: null, token: null };
+    } catch (err) {
+      console.error("Failed to estimate swap:", err);
+      if (!stillCurrent()) return;
+      state.swapEstimate = { loading: false, amount: null, token: null };
+    }
+    renderPaymentForm(el.paymentForm, state, handlers);
+  }, 500);
+}
+
 function validate() {
   const errs = {};
-  if (!isAddress(state.recipient)) errs.recipient = "Enter a valid 0x address.";
+  if (state.mode === "bridge" && !isAddress(state.recipient)) {
+    errs.recipient = "Enter a valid 0x address.";
+  }
   const parsed = parseFloat(state.amount);
   if (!state.amount || Number.isNaN(parsed) || parsed <= 0) {
     errs.amount = "Enter an amount greater than 0.";
@@ -181,6 +246,7 @@ const handlers = {
     state.chainId = null;
     state.payStatus = { state: "idle" };
     state.xp = null;
+    state.swapEstimate = { loading: false, amount: null, token: null };
     refreshBalances();
     refreshFromBalance();
     renderAll();
@@ -190,6 +256,8 @@ const handlers = {
     state.mode = mode === "swap" ? "swap" : "bridge";
     state.formErrors = {};
     renderPaymentForm(el.paymentForm, state, handlers);
+    refreshFromBalance();
+    scheduleSwapEstimate();
   },
 
   onSelectToChain(chainId) {
@@ -197,13 +265,24 @@ const handlers = {
     renderPaymentForm(el.paymentForm, state, handlers);
   },
 
+  onSelectSwapToken(token) {
+    state.swapTokenIn = token === "USDC" ? "USDC" : "NATIVE";
+    renderPaymentForm(el.paymentForm, state, handlers);
+    refreshFromBalance();
+    scheduleSwapEstimate();
+  },
+
   onMaxAmount() {
     if (!state.fromBalance.raw || state.fromBalance.raw <= 0n) return;
-    state.amount = formatUsdcAmountPlain(state.fromBalance.raw);
+    const wantsNative = state.mode === "swap" && state.swapTokenIn === "NATIVE";
+    state.amount = wantsNative
+      ? formatNativeAmountPlain(state.fromBalance.raw)
+      : formatUsdcAmountPlain(state.fromBalance.raw);
     if (state.formErrors.amount) {
       state.formErrors = { ...state.formErrors, amount: undefined };
     }
     renderPaymentForm(el.paymentForm, state, handlers);
+    scheduleSwapEstimate();
   },
 
   // Swaps From and To: switches the wallet to the current "to" chain, and
@@ -229,6 +308,7 @@ const handlers = {
       state.switching = false;
       renderAll();
       refreshFromBalance();
+      scheduleSwapEstimate();
     }
   },
 
@@ -246,6 +326,7 @@ const handlers = {
       state.formErrors = { ...state.formErrors, amount: undefined };
       el.paymentForm.querySelector('[data-error="amount"]').innerHTML = "";
     }
+    scheduleSwapEstimate();
   },
 
   async onSubmit(e) {
@@ -254,11 +335,38 @@ const handlers = {
       renderPaymentForm(el.paymentForm, state, handlers);
       return;
     }
-    const recordedKind = state.mode;
     const recordedAddress = state.address;
+
+    if (state.mode === "swap") {
+      const chainId = state.chainId;
+      const tokenIn = state.swapTokenIn;
+      const tokenOut = tokenIn === "NATIVE" ? "USDC" : "NATIVE";
+      await swap(chainId, tokenIn, tokenOut, state.amount, (status) => {
+        state.payStatus = status;
+        renderPaymentForm(el.paymentForm, state, handlers);
+        renderTxStatus(el.txStatus, state, handlers);
+
+        if (status.state === "success") {
+          // XP tracks USDC volume — use whichever side of the swap was USDC.
+          const usdcAmount =
+            status.tokenIn === "USDC" ? status.amountIn : status.tokenOut === "USDC" ? status.amountOut : null;
+          if (usdcAmount) {
+            recordActivity({ address: recordedAddress, amount: usdcAmount, txHash: status.txHash, kind: "swap" })
+              .then((updated) => {
+                state.xp = updated;
+                renderXpDisplay(el.xpDisplay, state);
+              })
+              .catch((err) => console.error("Failed to record wallet XP:", err));
+          }
+          refreshFromBalance();
+        }
+      });
+      return;
+    }
+
     const fromChainId = state.chainId;
-    const toChainId = state.mode === "swap" ? state.chainId : state.toChainId;
-    await pay(state.recipient, state.amount, fromChainId, toChainId, (status) => {
+    const toChainId = state.toChainId;
+    await bridge(state.recipient, state.amount, fromChainId, toChainId, (status) => {
       state.payStatus = status;
       renderPaymentForm(el.paymentForm, state, handlers);
       renderTxStatus(el.txStatus, state, handlers);
@@ -268,7 +376,7 @@ const handlers = {
           address: recordedAddress,
           amount: status.amount,
           txHash: status.txHash,
-          kind: recordedKind,
+          kind: "bridge",
         })
           .then((updated) => {
             state.xp = updated;
@@ -308,6 +416,7 @@ async function init() {
       ensureValidToChain();
       renderAll();
       refreshFromBalance();
+      scheduleSwapEstimate();
     });
   }
 

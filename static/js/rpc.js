@@ -15,7 +15,15 @@ async function rpcCall(rpcUrl, method, params) {
 
 // Native gas USDC balance on Arc Testnet (18 decimals)
 export async function getNativeBalance(address) {
-  const hex = await rpcCall(ARC_RPC_URL, "eth_getBalance", [address, "latest"]);
+  return getNativeBalanceOnChain(null, address);
+}
+
+// Native gas token balance (ETH/AVAX/etc., 18 decimals) on any supported
+// chain — used for the "You Pay" balance when swapping the native token.
+export async function getNativeBalanceOnChain(chainId, address) {
+  const rpcUrl = chainId ? CHAIN_RPC_URLS[chainId] : ARC_RPC_URL;
+  if (!rpcUrl) return null;
+  const hex = await rpcCall(rpcUrl, "eth_getBalance", [address, "latest"]);
   return BigInt(hex);
 }
 

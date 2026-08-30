@@ -31,4 +31,8 @@ export const CHAIN_USDC_ADDRESSES = Object.fromEntries(
   Object.entries(parsed.chainUsdcAddresses).map(([id, address]) => [Number(id), address]),
 );
 
+export const CHAIN_NATIVE_SYMBOLS = Object.fromEntries(
+  Object.entries(parsed.chainNativeSymbols).map(([id, symbol]) => [Number(id), symbol]),
+);
+
 export const ALL_SUPPORTED_CHAIN_IDS = [ARC_CHAIN_ID, ...SUPPORTED_SOURCE_CHAIN_IDS];
