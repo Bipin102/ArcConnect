@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" class="h-full antialiased">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}One-Click Cross-Chain USDC Pay{% endblock %}</title>
+    <meta
+      name="description"
+      content="Send USDC across chains to Arc Testnet with one click. Powered by Circle App Kit."
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+    />
+    <link rel="stylesheet" href="{{ static('css/output.css') }}" />
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body class="min-h-full flex flex-col bg-gray-950 text-white">
+    {% block content %}{% endblock %}
+    {% block extra_scripts %}{% endblock %}
+  </body>
+</html>
