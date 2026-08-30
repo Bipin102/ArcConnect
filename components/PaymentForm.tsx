@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount } from 'wagmi'
+import { useAccount, useConnect } from 'wagmi'
 import { isAddress } from 'viem'
 import { usePay } from '@/hooks/usePay'
 import { TxStatus } from './TxStatus'
@@ -11,6 +11,7 @@ const ALL_SUPPORTED = [ARC_CHAIN_ID, ...SUPPORTED_SOURCE_CHAIN_IDS]
 
 export function PaymentForm() {
   const { isConnected, chainId } = useAccount()
+  const { connect, connectors, isPending: isConnecting } = useConnect()
   const { pay, status, reset } = usePay()
 
   const [recipient, setRecipient] = useState('')
@@ -40,16 +41,55 @@ export function PaymentForm() {
   }
 
   if (!isConnected) {
+    const injected = connectors.find((c) => c.id === 'injected')
+    const wc = connectors.find((c) => c.id === 'walletConnect')
+
     return (
-      <div className="glass rounded-2xl p-10 text-center fade-in">
-        <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4">
+      <div className="glass rounded-2xl p-8 text-center fade-in space-y-5">
+        <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto">
           <svg className="w-7 h-7 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
           </svg>
         </div>
-        <p className="text-gray-300 font-medium mb-1">Connect your wallet</p>
-        <p className="text-gray-600 text-sm">Connect above to start sending USDC across chains.</p>
+        <div>
+          <p className="text-white font-semibold mb-1">Connect your wallet</p>
+          <p className="text-gray-600 text-sm">Choose your wallet to start sending USDC cross-chain.</p>
+        </div>
+        <div className="space-y-2">
+          {injected && (
+            <button
+              onClick={() => connect({ connector: injected })}
+              disabled={isConnecting}
+              className="btn-gradient w-full text-white font-semibold py-3 rounded-xl text-sm disabled:opacity-50 shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+            >
+              {isConnecting ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Connect Wallet
+                </>
+              )}
+            </button>
+          )}
+          {wc && (
+            <button
+              onClick={() => connect({ connector: wc })}
+              disabled={isConnecting}
+              className="w-full glass border border-white/10 text-gray-400 hover:text-white font-medium py-3 rounded-xl text-sm transition-colors disabled:opacity-50"
+            >
+              WalletConnect
+            </button>
+          )}
+          {connectors.length === 0 && (
+            <p className="text-sm text-gray-600">No wallet detected. Install MetaMask to continue.</p>
+          )}
+        </div>
       </div>
     )
   }
