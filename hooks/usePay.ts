@@ -45,6 +45,46 @@ function extractTxHash(result: BridgeResult): string {
 
 const kit = new AppKit()
 
+// Narrow shape shared by CCTP v2 step events (approve/burn/fetchAttestation/mint)
+type BridgeStepPayload = { values: { state: 'pending' | 'success' | 'error' | 'noop' } }
+
+// Surface each CCTP leg as it happens so a required network switch + second
+// signature (the mint step, on the destination chain) doesn't look like an
+// unexplained extra transaction.
+function attachBridgeProgressListeners(
+  sourceChainName: string,
+  destChainName: string,
+  setMessage: (message: string) => void,
+) {
+  const onApprove = (payload: BridgeStepPayload) => {
+    if (payload.values.state === 'pending') setMessage(`Approving USDC on ${sourceChainName}...`)
+  }
+  const onBurn = (payload: BridgeStepPayload) => {
+    if (payload.values.state === 'pending') setMessage(`Burning USDC on ${sourceChainName}...`)
+    if (payload.values.state === 'success') setMessage('Waiting for Circle attestation...')
+  }
+  const onFetchAttestation = (payload: BridgeStepPayload) => {
+    if (payload.values.state === 'pending') setMessage('Waiting for Circle attestation...')
+  }
+  const onMint = (payload: BridgeStepPayload) => {
+    if (payload.values.state === 'pending') {
+      setMessage(`Switching to ${destChainName} — approve the final step in your wallet to complete the transfer...`)
+    }
+  }
+
+  kit.on('bridge.approve', onApprove)
+  kit.on('bridge.burn', onBurn)
+  kit.on('bridge.fetchAttestation', onFetchAttestation)
+  kit.on('bridge.mint', onMint)
+
+  return () => {
+    kit.off('bridge.approve', onApprove)
+    kit.off('bridge.burn', onBurn)
+    kit.off('bridge.fetchAttestation', onFetchAttestation)
+    kit.off('bridge.mint', onMint)
+  }
+}
+
 export function usePay() {
   const { connector, chainId } = useAccount()
   const [status, setStatus] = useState<PayStatus>({ state: 'idle' })
@@ -103,18 +143,32 @@ export function usePay() {
             destinationChainId,
           })
         } else {
-          // Cross-chain bridge to the selected destination with recipient address
+          // Cross-chain bridge to the selected destination with recipient address.
+          // CCTP is two legs — burn on the source chain, then mint on the
+          // destination — so the wallet will switch networks and ask for a
+          // second signature partway through. That's expected, not a glitch.
           setStatus({ state: 'pending', message: 'Waiting for wallet approval...' })
 
-          const result = await kit.bridge({
-            from: { adapter, chain: sourceBridgeChain },
-            to: {
-              adapter,
-              chain: destBridgeChain,
-              recipientAddress: recipient,
-            },
-            amount,
-          })
+          const detachListeners = attachBridgeProgressListeners(
+            CHAIN_NAMES[chainId] ?? 'source chain',
+            CHAIN_NAMES[destinationChainId] ?? 'destination chain',
+            (message) => setStatus({ state: 'pending', message }),
+          )
+
+          let result: BridgeResult
+          try {
+            result = await kit.bridge({
+              from: { adapter, chain: sourceBridgeChain },
+              to: {
+                adapter,
+                chain: destBridgeChain,
+                recipientAddress: recipient,
+              },
+              amount,
+            })
+          } finally {
+            detachListeners()
+          }
 
           const txHash = extractTxHash(result)
           setStatus({
