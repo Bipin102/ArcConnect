@@ -14,7 +14,7 @@ export function useUsdcBalance(address?: `0x${string}`, chainId?: number) {
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
-    query: { enabled: !!address && !!tokenAddress },
+    query: { enabled: !!address && !!tokenAddress, refetchInterval: 10_000 },
     chainId,
   })
 

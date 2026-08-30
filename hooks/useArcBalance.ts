@@ -9,7 +9,7 @@ export function useArcBalance(address?: `0x${string}`) {
   const { data, isLoading, refetch } = useBalance({
     address,
     chainId: ARC_CHAIN_ID,
-    query: { enabled: !!address },
+    query: { enabled: !!address, refetchInterval: 10_000 },
   })
 
   return {

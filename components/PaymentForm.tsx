@@ -39,6 +39,15 @@ export function PaymentForm() {
     return () => document.removeEventListener('mousedown', onClickAway)
   }, [])
 
+  // Pick up the post-transaction balance right away instead of waiting on the poll interval
+  useEffect(() => {
+    if (status.state === 'success' || status.state === 'error') {
+      sourceUsdc.refetch()
+      destinationUsdc.refetch()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status.state])
+
   const currentChainName = chainId ? (CHAIN_NAMES[chainId] ?? `Chain ${chainId}`) : 'Select network'
   const destinationChainName = CHAIN_NAMES[destinationChainId] ?? `Chain ${destinationChainId}`
   const isSupportedChain = chainId
