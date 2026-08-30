@@ -61,3 +61,21 @@ export const EXPLORER_NAMES: Record<number, string> = {
   43113: 'Snowtrace',
   5042002: 'Arcscan',
 }
+
+// Native gas token symbol per chain. Only Arc uses USDC for gas — every other
+// chain here needs its own native token (ETH/AVAX), separate from USDC balance.
+export const NATIVE_GAS_SYMBOLS: Record<number, string> = {
+  11155111: 'ETH',
+  84532: 'ETH',
+  421614: 'ETH',
+  43113: 'AVAX',
+  5042002: 'USDC',
+}
+
+// Official faucet/docs pages for topping up native gas on each non-Arc chain
+export const NATIVE_GAS_FAUCET_URLS: Record<number, string> = {
+  11155111: 'https://cloud.google.com/application/web3/faucet/ethereum/sepolia',
+  84532: 'https://docs.base.org/tools/network-faucets',
+  421614: 'https://docs.arbitrum.io/for-devs/dev-tools-and-resources/chain-info',
+  43113: 'https://build.avax.network/console/primary-network/faucet',
+}

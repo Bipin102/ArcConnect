@@ -5,9 +5,18 @@ import { useAccount, useConnect, useSwitchChain } from 'wagmi'
 import { isAddress, formatUnits } from 'viem'
 import { usePay } from '@/hooks/usePay'
 import { useUsdcBalance } from '@/hooks/useUsdcBalance'
+import { useNativeGasBalance } from '@/hooks/useNativeGasBalance'
 import { TxStatus } from './TxStatus'
 import { ChainIcon } from './ChainIcon'
-import { CHAIN_NAMES, ARC_CHAIN_ID, SUPPORTED_SOURCE_CHAIN_IDS, ERC20_USDC_DECIMALS } from '@/lib/constants'
+import {
+  CHAIN_NAMES,
+  ARC_CHAIN_ID,
+  SUPPORTED_SOURCE_CHAIN_IDS,
+  ERC20_USDC_DECIMALS,
+  NATIVE_GAS_SYMBOLS,
+  NATIVE_GAS_FAUCET_URLS,
+  ARC_FAUCET_URL,
+} from '@/lib/constants'
 
 const ALL_SUPPORTED = [ARC_CHAIN_ID, ...SUPPORTED_SOURCE_CHAIN_IDS]
 const SELECTABLE_CHAINS = [...SUPPORTED_SOURCE_CHAIN_IDS, ARC_CHAIN_ID]
@@ -29,6 +38,9 @@ export function PaymentForm() {
 
   const sourceUsdc = useUsdcBalance(address, chainId)
   const destinationUsdc = useUsdcBalance(address, destinationChainId)
+  const sourceGas = useNativeGasBalance(address, chainId)
+  const gasSymbol = chainId ? (NATIVE_GAS_SYMBOLS[chainId] ?? 'gas') : 'gas'
+  const gasFaucetUrl = chainId === ARC_CHAIN_ID ? ARC_FAUCET_URL : chainId ? NATIVE_GAS_FAUCET_URLS[chainId] : undefined
 
   useEffect(() => {
     function onClickAway(e: MouseEvent) {
@@ -227,6 +239,24 @@ export function PaymentForm() {
                 >
                   Max
                 </button>
+              </div>
+            )}
+            {isSupportedChain && (
+              <div className="flex items-center gap-1.5 mt-2 text-[11px]">
+                <span className={`w-1.5 h-1.5 rounded-full ${sourceGas.raw > 0n ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                <span className="text-gray-400">
+                  Gas: {sourceGas.isLoading ? '—' : sourceGas.formatted} {gasSymbol}
+                </span>
+                {sourceGas.raw === 0n && gasFaucetUrl && (
+                  <a
+                    href={gasFaucetUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-600 hover:text-indigo-700 transition-colors ml-auto"
+                  >
+                    Get {gasSymbol}
+                  </a>
+                )}
               </div>
             )}
             {errors.amount && (
