@@ -3,11 +3,11 @@
 import { useAccount } from 'wagmi'
 import { useUsdcBalance } from '@/hooks/useUsdcBalance'
 import { useArcBalance } from '@/hooks/useArcBalance'
-import { ARC_FAUCET_URL } from '@/lib/constants'
+import { ARC_FAUCET_URL, ARC_CHAIN_ID } from '@/lib/constants'
 
 export function BalanceDisplay() {
   const { address, isConnected } = useAccount()
-  const usdc = useUsdcBalance(address)
+  const usdc = useUsdcBalance(address, ARC_CHAIN_ID)
   const gas = useArcBalance(address)
 
   if (!isConnected) return null

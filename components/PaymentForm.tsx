@@ -2,12 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useAccount, useConnect, useSwitchChain } from 'wagmi'
-import { isAddress } from 'viem'
+import { isAddress, formatUnits } from 'viem'
 import { usePay } from '@/hooks/usePay'
 import { useUsdcBalance } from '@/hooks/useUsdcBalance'
 import { TxStatus } from './TxStatus'
 import { ChainIcon } from './ChainIcon'
-import { CHAIN_NAMES, ARC_CHAIN_ID, SUPPORTED_SOURCE_CHAIN_IDS } from '@/lib/constants'
+import { CHAIN_NAMES, ARC_CHAIN_ID, SUPPORTED_SOURCE_CHAIN_IDS, ERC20_USDC_DECIMALS } from '@/lib/constants'
 
 const ALL_SUPPORTED = [ARC_CHAIN_ID, ...SUPPORTED_SOURCE_CHAIN_IDS]
 const SELECTABLE_CHAINS = [...SUPPORTED_SOURCE_CHAIN_IDS, ARC_CHAIN_ID]
@@ -27,7 +27,8 @@ export function PaymentForm() {
   const fromMenuRef = useRef<HTMLDivElement>(null)
   const toMenuRef = useRef<HTMLDivElement>(null)
 
-  const destinationUsdc = useUsdcBalance(destinationChainId === ARC_CHAIN_ID ? address : undefined)
+  const sourceUsdc = useUsdcBalance(address, chainId)
+  const destinationUsdc = useUsdcBalance(address, destinationChainId)
 
   useEffect(() => {
     function onClickAway(e: MouseEvent) {
@@ -143,10 +144,14 @@ export function PaymentForm() {
           <div className="slot-card rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] text-gray-400 uppercase tracking-widest font-medium">From</span>
-              {!isSupportedChain && (
+              {!isSupportedChain ? (
                 <span className="flex items-center gap-1 text-[11px] text-red-500">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
                   Unsupported
+                </span>
+              ) : (
+                <span className="text-[11px] text-gray-400">
+                  Balance: {sourceUsdc.isLoading ? '—' : sourceUsdc.formatted}
                 </span>
               )}
             </div>
@@ -203,6 +208,18 @@ export function PaymentForm() {
                 className="flex-1 min-w-0 bg-transparent text-right text-2xl font-semibold text-gray-900 placeholder-gray-300 outline-none disabled:opacity-40"
               />
             </div>
+            {isSupportedChain && sourceUsdc.raw > 0n && (
+              <div className="flex justify-end mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => { setAmount(formatUnits(sourceUsdc.raw, ERC20_USDC_DECIMALS)); setErrors((p) => ({ ...p, amount: undefined })) }}
+                  disabled={isPending}
+                  className="text-[11px] font-medium text-indigo-600 hover:text-indigo-700 transition-colors disabled:opacity-40"
+                >
+                  Max
+                </button>
+              </div>
+            )}
             {errors.amount && (
               <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -233,11 +250,9 @@ export function PaymentForm() {
           <div className="slot-card rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] text-gray-400 uppercase tracking-widest font-medium">To</span>
-              {destinationChainId === ARC_CHAIN_ID && (
-                <span className="text-[11px] text-gray-400">
-                  Balance: {destinationUsdc.isLoading ? '—' : destinationUsdc.formatted}
-                </span>
-              )}
+              <span className="text-[11px] text-gray-400">
+                Balance: {destinationUsdc.isLoading ? '—' : destinationUsdc.formatted}
+              </span>
             </div>
             <div className="flex items-center justify-between gap-3">
               <div className="relative" ref={toMenuRef}>

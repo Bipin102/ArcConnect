@@ -2,18 +2,20 @@
 
 import { useReadContract } from 'wagmi'
 import { erc20Abi } from 'viem'
-import { ARC_USDC_ADDRESS } from '@/lib/constants'
+import { USDC_ADDRESSES } from '@/lib/constants'
 import { formatUsdcBalance } from '@/lib/utils'
 
-// Read ERC-20 USDC balance on Arc Testnet (6 decimals)
-export function useUsdcBalance(address?: `0x${string}`) {
+// Read ERC-20 USDC balance for a given address on a given chain (6 decimals)
+export function useUsdcBalance(address?: `0x${string}`, chainId?: number) {
+  const tokenAddress = chainId ? USDC_ADDRESSES[chainId] : undefined
+
   const { data: raw, isLoading, refetch } = useReadContract({
-    address: ARC_USDC_ADDRESS,
+    address: tokenAddress,
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
-    chainId: 5042002,
+    query: { enabled: !!address && !!tokenAddress },
+    chainId,
   })
 
   return {
