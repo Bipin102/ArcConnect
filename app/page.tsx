@@ -6,11 +6,8 @@ import { NetworkGuard } from '@/components/NetworkGuard'
 import { BalanceDisplay } from '@/components/BalanceDisplay'
 import { PaymentForm } from '@/components/PaymentForm'
 import { StatsSidebar } from '@/components/StatsSidebar'
-import { useActivityStats } from '@/hooks/useActivityStats'
 
 export default function Home() {
-  const { stats, recordTransaction, resetStats } = useActivityStats()
-
   return (
     <div className="bg-mesh min-h-screen">
       {/* Top nav */}
@@ -40,11 +37,7 @@ export default function Home() {
 
       <main className="max-w-5xl mx-auto px-4 py-12">
         <div className="flex flex-col lg:flex-row lg:items-start justify-center gap-8">
-          <StatsSidebar
-            stats={stats}
-            onReset={resetStats}
-            className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-24 order-2 lg:order-1"
-          />
+          <StatsSidebar className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-24 order-2 lg:order-1" />
 
           <div id="bridge" className="max-w-md w-full mx-auto lg:mx-0 scroll-mt-24 order-1 lg:order-2">
             {/* Compact heading */}
@@ -57,7 +50,7 @@ export default function Home() {
 
             <NetworkGuard />
             <BalanceDisplay />
-            <PaymentForm onPaymentSuccess={recordTransaction} />
+            <PaymentForm />
           </div>
         </div>
 
