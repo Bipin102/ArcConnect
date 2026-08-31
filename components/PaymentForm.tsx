@@ -6,8 +6,10 @@ import { isAddress, formatUnits } from 'viem'
 import { usePay } from '@/hooks/usePay'
 import { useUsdcBalance } from '@/hooks/useUsdcBalance'
 import { useNativeGasBalance } from '@/hooks/useNativeGasBalance'
+import { useHasInjectedProvider } from '@/hooks/useHasInjectedProvider'
 import { TxStatus } from './TxStatus'
 import { ChainIcon } from './ChainIcon'
+import { formatConnectError } from '@/lib/utils'
 import {
   CHAIN_NAMES,
   ARC_CHAIN_ID,
@@ -26,6 +28,7 @@ export function PaymentForm() {
   const { connect, connectors, isPending: isConnecting, error: connectError } = useConnect()
   const { switchChain, isPending: isSwitching } = useSwitchChain()
   const { pay, status, reset } = usePay()
+  const hasInjectedProvider = useHasInjectedProvider()
 
   const [destinationChainId, setDestinationChainId] = useState<number>(ARC_CHAIN_ID)
   const [recipient, setRecipient] = useState('')
@@ -108,7 +111,7 @@ export function PaymentForm() {
           <p className="text-gray-500 text-sm">Choose your wallet to start bridging USDC.</p>
         </div>
         <div className="space-y-2">
-          {injected && (
+          {injected && hasInjectedProvider && (
             <button
               onClick={() => connect({ connector: injected })}
               disabled={isConnecting}
@@ -133,17 +136,31 @@ export function PaymentForm() {
             <button
               onClick={() => connect({ connector: wc })}
               disabled={isConnecting}
-              className="w-full bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 font-medium py-3 rounded-xl text-sm transition-colors disabled:opacity-50"
+              className={
+                hasInjectedProvider
+                  ? 'w-full bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 font-medium py-3 rounded-xl text-sm transition-colors disabled:opacity-50'
+                  : 'btn-gradient w-full text-white font-semibold py-3 rounded-xl text-sm disabled:opacity-50 shadow-lg shadow-indigo-500/15'
+              }
             >
-              WalletConnect
+              {isConnecting && !hasInjectedProvider ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Connecting...
+                </span>
+              ) : (
+                'WalletConnect'
+              )}
             </button>
           )}
-          {connectors.length === 0 && (
-            <p className="text-sm text-gray-500">No wallet detected. Install MetaMask to continue.</p>
+          {!injected && !wc && (
+            <p className="text-sm text-gray-500">No wallet connector available.</p>
+          )}
+          {!hasInjectedProvider && (
+            <p className="text-xs text-gray-400">No wallet extension in this browser — use WalletConnect to open your wallet app.</p>
           )}
           {connectError && (
             <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-left">
-              {connectError.message}
+              {formatConnectError(connectError)}
             </p>
           )}
         </div>

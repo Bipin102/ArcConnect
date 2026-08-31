@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
-import { shortenAddress } from '@/lib/utils'
+import { shortenAddress, formatConnectError } from '@/lib/utils'
+import { useHasInjectedProvider } from '@/hooks/useHasInjectedProvider'
 
 const CONNECTOR_LABELS: Record<string, string> = {
   injected: 'Browser Wallet',
@@ -13,6 +14,7 @@ export function ConnectButton() {
   const { address, isConnected } = useAccount()
   const { connect, connectors, isPending, error } = useConnect()
   const { disconnect } = useDisconnect()
+  const hasInjectedProvider = useHasInjectedProvider()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -41,15 +43,22 @@ export function ConnectButton() {
     )
   }
 
-  if (connectors.length === 0) {
+  // Drop the injected connector from the offered list when there's no
+  // actual browser-extension provider (mobile in-app browsers, plain
+  // mobile Safari/Chrome) — offering it just guarantees a failed click.
+  const visibleConnectors = hasInjectedProvider
+    ? connectors
+    : connectors.filter((c) => c.id !== 'injected')
+
+  if (visibleConnectors.length === 0) {
     return <p className="text-sm text-gray-500">Install MetaMask to continue.</p>
   }
 
   // One connector — a single button. Multiple connectors — one button that
   // opens a dropdown, instead of stacking separate buttons that overflow a
   // compact mobile nav.
-  if (connectors.length === 1) {
-    const connector = connectors[0]
+  if (visibleConnectors.length === 1) {
+    const connector = visibleConnectors[0]
     return (
       <div className="relative">
         <button
@@ -68,7 +77,7 @@ export function ConnectButton() {
         </button>
         {error && (
           <p className="absolute right-0 top-full mt-2 w-56 text-xs text-red-500 bg-white border border-red-100 rounded-lg px-3 py-2 shadow-sm z-20">
-            {error.message}
+            {formatConnectError(error)}
           </p>
         )}
       </div>
@@ -99,7 +108,7 @@ export function ConnectButton() {
 
       {menuOpen && (
         <div className="absolute right-0 top-full mt-2 z-20 w-48 widget-card rounded-2xl p-1.5 fade-in">
-          {connectors.map((connector) => (
+          {visibleConnectors.map((connector) => (
             <button
               key={connector.uid}
               type="button"
@@ -117,7 +126,7 @@ export function ConnectButton() {
 
       {error && !menuOpen && (
         <p className="absolute right-0 top-full mt-2 w-56 text-xs text-red-500 bg-white border border-red-100 rounded-lg px-3 py-2 shadow-sm z-20">
-          {error.message}
+          {formatConnectError(error)}
         </p>
       )}
     </div>

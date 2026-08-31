@@ -15,6 +15,17 @@ export function formatNativeUsdcBalance(raw: bigint): string {
   return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })
 }
 
+// Turn a raw wagmi/viem connect error into a message a user can act on
+export function formatConnectError(error: { name?: string; message?: string }): string {
+  if (error.name === 'ProviderNotFoundError') {
+    return 'No wallet extension detected in this browser. Use WalletConnect to connect a mobile wallet app instead.'
+  }
+  if (error.message?.includes('User rejected')) {
+    return 'Connection request was rejected.'
+  }
+  return error.message ?? 'Failed to connect wallet.'
+}
+
 // Truncate an address for display: 0x1234...abcd
 export function shortenAddress(address: string): string {
   if (address.length < 10) return address
