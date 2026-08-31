@@ -1,9 +1,10 @@
 'use client'
 
 import { PayStatus } from '@/hooks/usePay'
+import { useRecordReceipt } from '@/hooks/useRecordReceipt'
 import { ExplorerLink } from './ExplorerLink'
 import { shortenAddress } from '@/lib/utils'
-import { CHAIN_NAMES, EXPLORER_NAMES } from '@/lib/constants'
+import { CHAIN_NAMES, EXPLORER_NAMES, ARC_CHAIN_ID } from '@/lib/constants'
 
 interface TxStatusProps {
   status: PayStatus
@@ -11,6 +12,8 @@ interface TxStatusProps {
 }
 
 export function TxStatus({ status, onReset }: TxStatusProps) {
+  const { recordReceipt, status: receiptStatus } = useRecordReceipt()
+
   if (status.state === 'idle') return null
 
   if (status.state === 'pending') {
@@ -68,6 +71,51 @@ export function TxStatus({ status, onReset }: TxStatusProps) {
               explorerUrl={status.explorerUrl}
               label={EXPLORER_NAMES[status.destinationChainId] ?? 'Explorer'}
             />
+          </div>
+        )}
+
+        {status.txHash && (
+          <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 mb-4">
+            {receiptStatus.state === 'success' ? (
+              <div className="flex items-start gap-2">
+                <svg className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                <div>
+                  <p className="text-xs font-medium text-gray-700 mb-1">Receipt recorded on Arc</p>
+                  <ExplorerLink txHash={receiptStatus.txHash} explorerUrl={receiptStatus.explorerUrl} label="Arcscan" />
+                </div>
+              </div>
+            ) : receiptStatus.state === 'pending' ? (
+              <div className="flex items-center gap-2">
+                <div className="w-3.5 h-3.5 border-2 border-indigo-200 border-t-indigo-500 rounded-full animate-spin flex-shrink-0" />
+                <p className="text-xs text-gray-600">{receiptStatus.message}</p>
+              </div>
+            ) : (
+              <div>
+                <p className="text-xs text-gray-500 mb-2 leading-relaxed">
+                  Optionally log this payment on Arc for a public, tamper-evident receipt.
+                  {status.sourceChainId !== ARC_CHAIN_ID && ' Requires switching your wallet to Arc Testnet.'}
+                </p>
+                {receiptStatus.state === 'error' && (
+                  <p className="text-xs text-red-500 mb-2 break-words">{receiptStatus.message}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={() =>
+                    recordReceipt({
+                      recipient: status.recipient as `0x${string}`,
+                      amount: status.amount,
+                      sourceChainId: status.sourceChainId,
+                      refTxHash: status.txHash,
+                    })
+                  }
+                  className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                >
+                  {receiptStatus.state === 'error' ? 'Try recording again' : 'Record on-chain receipt'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 

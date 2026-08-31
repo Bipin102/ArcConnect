@@ -2,9 +2,6 @@
 cache/
 out/
 
-# Vendored dependency — fetch with `forge install foundry-rs/forge-std --no-commit`
-lib/
-
 # Secrets — never commit
 .env
 .env.*

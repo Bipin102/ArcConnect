@@ -7,12 +7,17 @@ tamper-evident receipt (sender, recipient, amount, source chain, time)
 after the real transfer has already settled, keyed by a caller-chosen
 reference id (e.g. the settlement transaction hash).
 
+Deployed on Arc Testnet at
+[`0x3acCe2Ae4563e4802473173Ed70e29020DC4bb0a`](https://testnet.arcscan.app/address/0x3acCe2Ae4563e4802473173Ed70e29020DC4bb0a),
+and wired into the app — the "Record on-chain receipt" button on a
+successful payment calls it directly (see `hooks/useRecordReceipt.ts`).
+
 ## Setup
 
 ```bash
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
-forge install foundry-rs/forge-std --no-commit
+git submodule update --init --recursive
 ```
 
 Copy `.env.example` to `.env` and fill in your own testnet-only

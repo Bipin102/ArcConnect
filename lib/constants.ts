@@ -79,3 +79,18 @@ export const NATIVE_GAS_FAUCET_URLS: Record<number, string> = {
   421614: 'https://docs.arbitrum.io/for-devs/dev-tools-and-resources/chain-info',
   43113: 'https://build.avax.network/console/primary-network/faucet',
 }
+
+// ArcConnectReceipts — deployed on Arc Testnet only. Records a non-custodial
+// receipt (sender, recipient, amount, source chain, timestamp) for a payment
+// that already settled via bridge/send. See contracts/src/ArcConnectReceipts.sol.
+export const ARC_CONNECT_RECEIPTS_ADDRESS = '0x3acCe2Ae4563e4802473173Ed70e29020DC4bb0a' as const
+
+// CCTP domain ids per chain, used only as informational metadata on receipts.
+// Source: https://developers.circle.com/cctp/cctp-supported-blockchains
+export const CCTP_DOMAINS: Record<number, number> = {
+  11155111: 0, // Ethereum Sepolia
+  43113: 1, // Avalanche Fuji
+  421614: 3, // Arbitrum Sepolia
+  84532: 6, // Base Sepolia
+  5042002: 26, // Arc Testnet
+}

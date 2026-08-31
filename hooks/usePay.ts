@@ -17,7 +17,15 @@ import { CHAIN_NAMES } from '@/lib/constants'
 export type PayStatus =
   | { state: 'idle' }
   | { state: 'pending'; message: string }
-  | { state: 'success'; txHash: string; explorerUrl: string; amount: string; recipient: string; destinationChainId: number }
+  | {
+      state: 'success'
+      txHash: string
+      explorerUrl: string
+      amount: string
+      recipient: string
+      sourceChainId: number
+      destinationChainId: number
+    }
   | { state: 'error'; message: string }
 
 const SUPPORTED_SOURCE_CHAINS = [
@@ -157,6 +165,7 @@ export function usePay() {
             explorerUrl: buildExplorerTxUrl(txHash, destinationChainId),
             amount,
             recipient,
+            sourceChainId: chainId,
             destinationChainId,
           })
         } else {
@@ -194,6 +203,7 @@ export function usePay() {
             explorerUrl: buildExplorerTxUrl(txHash, destinationChainId),
             amount,
             recipient,
+            sourceChainId: chainId,
             destinationChainId,
           })
         }
