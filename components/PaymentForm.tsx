@@ -23,7 +23,7 @@ const SELECTABLE_CHAINS = [...SUPPORTED_SOURCE_CHAIN_IDS, ARC_CHAIN_ID]
 
 export function PaymentForm() {
   const { address, isConnected, chainId } = useAccount()
-  const { connect, connectors, isPending: isConnecting } = useConnect()
+  const { connect, connectors, isPending: isConnecting, error: connectError } = useConnect()
   const { switchChain, isPending: isSwitching } = useSwitchChain()
   const { pay, status, reset } = usePay()
 
@@ -140,6 +140,11 @@ export function PaymentForm() {
           )}
           {connectors.length === 0 && (
             <p className="text-sm text-gray-500">No wallet detected. Install MetaMask to continue.</p>
+          )}
+          {connectError && (
+            <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-left">
+              {connectError.message}
+            </p>
           )}
         </div>
       </div>
