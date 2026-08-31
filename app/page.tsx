@@ -12,7 +12,7 @@ export default function Home() {
     <div className="bg-mesh min-h-screen">
       {/* Top nav */}
       <nav className="border-b border-gray-100 glass sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <Image
               src="/arcconnect-logo.png"
@@ -35,22 +35,24 @@ export default function Home() {
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-4 py-12">
-        <div className="flex flex-col lg:flex-row lg:items-start justify-center gap-8">
-          <StatsSidebar className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-24 order-2 lg:order-1" />
+      <main className="max-w-6xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[16rem_1fr] gap-8">
+          <StatsSidebar className="w-full lg:sticky lg:top-24 order-2 lg:order-1" />
 
-          <div id="bridge" className="max-w-md w-full mx-auto lg:mx-0 scroll-mt-24 order-1 lg:order-2">
-            {/* Compact heading */}
-            <div className="flex items-center justify-between px-1 mb-4">
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900">Bridge USDC to Arc</h1>
-                <p className="text-xs text-gray-500 mt-0.5">Settled via Circle CCTP · testnet only</p>
+          <div className="flex justify-center order-1 lg:order-2">
+            <div id="bridge" className="max-w-md w-full scroll-mt-24">
+              {/* Compact heading */}
+              <div className="flex items-center justify-between px-1 mb-4">
+                <div>
+                  <h1 className="text-lg font-semibold text-gray-900">Bridge USDC to Arc</h1>
+                  <p className="text-xs text-gray-500 mt-0.5">Settled via Circle CCTP · testnet only</p>
+                </div>
               </div>
-            </div>
 
-            <NetworkGuard />
-            <BalanceDisplay />
-            <PaymentForm />
+              <NetworkGuard />
+              <BalanceDisplay />
+              <PaymentForm />
+            </div>
           </div>
         </div>
 

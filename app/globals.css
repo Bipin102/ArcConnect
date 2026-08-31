@@ -18,14 +18,14 @@ body {
   font-family: var(--font-geist-sans), Arial, sans-serif;
 }
 
-/* Professional fintech-style background: dot grid + one restrained glow */
+/* Smooth, professional gradient wash — soft blurred color fields, no texture */
 .bg-mesh {
-  background-color: #f7f9fc;
+  background-color: #f8f9fc;
   background-image:
-    radial-gradient(ellipse 1000px 520px at 50% -8%, rgba(79, 70, 229, 0.09) 0%, transparent 60%),
-    radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.055) 1px, transparent 0);
-  background-size: 100% 100%, 28px 28px;
-  background-position: 0 0, 0 0;
+    radial-gradient(1100px 650px at 12% -12%, rgba(79, 70, 229, 0.08), transparent 60%),
+    radial-gradient(1000px 700px at 88% 0%, rgba(59, 130, 246, 0.07), transparent 55%),
+    radial-gradient(1200px 800px at 50% 115%, rgba(129, 140, 248, 0.05), transparent 60%);
+  background-attachment: fixed;
 }
 
 /* Translucent white nav */
