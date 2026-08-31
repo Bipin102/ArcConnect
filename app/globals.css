@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f9fc;
-  --foreground: #14141f;
+  --background: #f6f5f9;
+  --foreground: #15141f;
+  --brand-1: #7c3aed;
+  --brand-2: #4f46e5;
+  --brand-3: #2563eb;
 }
 
 @theme inline {
@@ -16,63 +19,80 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Smooth, professional gradient wash — soft blurred color fields, no texture */
+/* Aurora wash — layered, asymmetric color fields with a warm accent for
+   richness instead of a flat corporate gradient. Large, soft, low-opacity. */
 .bg-mesh {
-  background-color: #f8f9fc;
+  background-color: #f6f5f9;
   background-image:
-    radial-gradient(1100px 650px at 12% -12%, rgba(79, 70, 229, 0.08), transparent 60%),
-    radial-gradient(1000px 700px at 88% 0%, rgba(59, 130, 246, 0.07), transparent 55%),
-    radial-gradient(1200px 800px at 50% 115%, rgba(129, 140, 248, 0.05), transparent 60%);
+    radial-gradient(900px 620px at 8% -8%, rgba(124, 58, 237, 0.10), transparent 58%),
+    radial-gradient(1000px 720px at 100% 8%, rgba(37, 99, 235, 0.09), transparent 55%),
+    radial-gradient(760px 560px at 78% 92%, rgba(244, 114, 182, 0.06), transparent 60%),
+    radial-gradient(900px 700px at 15% 100%, rgba(79, 70, 229, 0.07), transparent 58%),
+    linear-gradient(180deg, #f8f7fb 0%, #f3f2f8 100%);
   background-attachment: fixed;
 }
 
-/* Translucent white nav */
+/* Translucent nav — sits above the wash with its own soft separation */
 .glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(20, 20, 31, 0.06);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid rgba(21, 20, 31, 0.06);
+  box-shadow: 0 1px 0 rgba(21, 20, 31, 0.03);
 }
 
-/* Bridge widget shell */
+/* Bridge widget shell — layered depth + a faint top highlight, like light
+   catching a glass surface, instead of a flat white box */
 .widget-card {
-  background: #ffffff;
-  border: 1px solid rgba(20, 20, 31, 0.08);
-  box-shadow: 0 1px 2px rgba(20, 20, 31, 0.03), 0 20px 40px -20px rgba(76, 60, 220, 0.16);
+  background: linear-gradient(180deg, #ffffff 0%, #fdfcff 100%);
+  border: 1px solid rgba(79, 70, 229, 0.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(21, 20, 31, 0.04),
+    0 12px 24px -12px rgba(76, 60, 220, 0.18),
+    0 32px 64px -28px rgba(76, 60, 220, 0.22);
 }
 
 /* Inner From/To slot */
 .slot-card {
-  background: #f7f7fb;
-  border: 1px solid rgba(20, 20, 31, 0.06);
-  transition: border-color 0.15s;
+  background: linear-gradient(180deg, #f8f8fc 0%, #f4f3f9 100%);
+  border: 1px solid rgba(21, 20, 31, 0.06);
+  transition: border-color 0.15s, background 0.15s;
 }
 .slot-card:hover {
-  border-color: rgba(20, 20, 31, 0.12);
+  border-color: rgba(79, 70, 229, 0.18);
 }
 
 /* Divider swap-arrow badge between From/To */
 .swap-divider {
   background: #ffffff;
-  border: 4px solid #f6f6fb;
-  box-shadow: 0 0 0 1px rgba(20, 20, 31, 0.08);
+  border: 4px solid #f6f5f9;
+  box-shadow: 0 0 0 1px rgba(21, 20, 31, 0.08), 0 4px 10px -4px rgba(76, 60, 220, 0.2);
 }
 
 /* Input focus glow */
 input:focus {
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.14);
 }
 
-/* Gradient button (primary action) */
+/* Gradient button (primary action) — richer three-stop gradient with an
+   inner highlight and a soft brand-colored glow instead of a flat fill */
 .btn-gradient {
-  background: linear-gradient(135deg, #6d5bf5 0%, #4338ca 100%);
-  transition: opacity 0.2s, transform 0.1s;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d5bf5 45%, #4338ca 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 8px 20px -6px rgba(79, 70, 229, 0.45);
+  transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
 }
 .btn-gradient:hover:not(:disabled) {
-  opacity: 0.92;
+  opacity: 0.94;
   transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 12px 28px -6px rgba(79, 70, 229, 0.5);
 }
 .btn-gradient:active:not(:disabled) {
   transform: translateY(0);
@@ -80,11 +100,12 @@ input:focus {
 
 /* Dark button (nav / secondary emphasis) */
 .btn-dark {
-  background: #111114;
+  background: linear-gradient(180deg, #1c1b26 0%, #0f0e17 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 6px 16px -6px rgba(15, 14, 23, 0.5);
   transition: opacity 0.2s, transform 0.1s;
 }
 .btn-dark:hover:not(:disabled) {
-  opacity: 0.85;
+  opacity: 0.88;
 }
 .btn-dark:active:not(:disabled) {
   transform: translateY(1px);
