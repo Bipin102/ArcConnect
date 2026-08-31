@@ -21,7 +21,11 @@ import {
 const ALL_SUPPORTED = [ARC_CHAIN_ID, ...SUPPORTED_SOURCE_CHAIN_IDS]
 const SELECTABLE_CHAINS = [...SUPPORTED_SOURCE_CHAIN_IDS, ARC_CHAIN_ID]
 
-export function PaymentForm() {
+interface PaymentFormProps {
+  onPaymentSuccess?: (amount: number, wasCrossChainBridge: boolean) => void
+}
+
+export function PaymentForm({ onPaymentSuccess }: PaymentFormProps = {}) {
   const { address, isConnected, chainId } = useAccount()
   const { connect, connectors, isPending: isConnecting } = useConnect()
   const { switchChain, isPending: isSwitching } = useSwitchChain()
@@ -56,6 +60,9 @@ export function PaymentForm() {
     if (status.state === 'success' || status.state === 'error') {
       sourceUsdc.refetch()
       destinationUsdc.refetch()
+    }
+    if (status.state === 'success') {
+      onPaymentSuccess?.(parseFloat(status.amount), status.sourceChainId !== status.destinationChainId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.state])

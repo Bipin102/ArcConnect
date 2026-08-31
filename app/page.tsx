@@ -5,8 +5,12 @@ import { ConnectButton } from '@/components/ConnectButton'
 import { NetworkGuard } from '@/components/NetworkGuard'
 import { BalanceDisplay } from '@/components/BalanceDisplay'
 import { PaymentForm } from '@/components/PaymentForm'
+import { StatsSidebar } from '@/components/StatsSidebar'
+import { useActivityStats } from '@/hooks/useActivityStats'
 
 export default function Home() {
+  const { stats, recordTransaction, resetStats } = useActivityStats()
+
   return (
     <div className="bg-mesh min-h-screen">
       {/* Top nav */}
@@ -35,22 +39,30 @@ export default function Home() {
       </nav>
 
       <main className="max-w-5xl mx-auto px-4 py-12">
-        <div id="bridge" className="max-w-md mx-auto scroll-mt-24">
-          {/* Compact heading */}
-          <div className="flex items-center justify-between px-1 mb-4">
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">Bridge USDC to Arc</h1>
-              <p className="text-xs text-gray-500 mt-0.5">Settled via Circle CCTP · testnet only</p>
-            </div>
-          </div>
+        <div className="flex flex-col lg:flex-row lg:items-start justify-center gap-8">
+          <StatsSidebar
+            stats={stats}
+            onReset={resetStats}
+            className="w-full lg:w-64 flex-shrink-0 lg:sticky lg:top-24 order-2 lg:order-1"
+          />
 
-          <NetworkGuard />
-          <BalanceDisplay />
-          <PaymentForm />
+          <div id="bridge" className="max-w-md w-full mx-auto lg:mx-0 scroll-mt-24 order-1 lg:order-2">
+            {/* Compact heading */}
+            <div className="flex items-center justify-between px-1 mb-4">
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">Bridge USDC to Arc</h1>
+                <p className="text-xs text-gray-500 mt-0.5">Settled via Circle CCTP · testnet only</p>
+              </div>
+            </div>
+
+            <NetworkGuard />
+            <BalanceDisplay />
+            <PaymentForm onPaymentSuccess={recordTransaction} />
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-10 pt-6 border-t border-gray-100 max-w-md mx-auto flex items-center justify-between">
+        <div className="mt-10 pt-6 border-t border-gray-100 flex items-center justify-between">
           <p className="text-xs text-gray-400">
             Gas token is USDC, not ETH ·{' '}
             <a
