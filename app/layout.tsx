@@ -18,13 +18,28 @@ export const metadata: Metadata = {
   description: "Send USDC across chains to Arc Testnet with one click. Powered by Circle App Kit.",
 };
 
+const themeInitScript = `
+(function () {
+  try {
+    var stored = window.localStorage.getItem('arcconnect_theme');
+    var isDark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.classList.toggle('dark', isDark);
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-gray-950 text-white">
+      <head>
+        {/* Set the theme class before paint to avoid a flash of the wrong theme */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+      <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
       </body>
     </html>

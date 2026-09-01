@@ -14,7 +14,7 @@ export function ExplorerLink({ txHash, explorerUrl, label = 'Explorer' }: Explor
       href={explorerUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-sm underline underline-offset-2 transition-colors"
+      className="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-sm underline underline-offset-2 transition-colors"
     >
       View on {label}: {shortenAddress(txHash)}
       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

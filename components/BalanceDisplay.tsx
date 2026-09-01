@@ -15,19 +15,19 @@ export function BalanceDisplay() {
   const hasGas = gas.raw > 0n
 
   return (
-    <div className="bg-white rounded-xl px-4 py-2.5 mb-4 border border-gray-200 shadow-sm fade-in flex items-center justify-between gap-3 text-xs">
+    <div className="bg-white dark:bg-white/5 rounded-xl px-4 py-2.5 mb-4 border border-gray-200 dark:border-white/10 shadow-sm fade-in flex items-center justify-between gap-3 text-xs">
       <div className="flex items-center gap-4 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className={`w-1.5 h-1.5 rounded-full ${hasGas ? 'bg-emerald-500' : 'bg-red-500'}`} />
-          <span className="text-gray-400">Gas USDC</span>
-          <span className={`font-mono font-medium ${hasGas ? 'text-gray-700' : 'text-red-500'}`}>
+          <span className="text-gray-400 dark:text-gray-500">Gas USDC</span>
+          <span className={`font-mono font-medium ${hasGas ? 'text-gray-700 dark:text-gray-200' : 'text-red-500 dark:text-red-400'}`}>
             {gas.isLoading ? <span className="shimmer inline-block w-10 h-3 rounded" /> : gas.formatted}
           </span>
         </div>
-        <div className="w-px h-3 bg-gray-200 flex-shrink-0" />
+        <div className="w-px h-3 bg-gray-200 dark:bg-white/10 flex-shrink-0" />
         <div className="flex items-center gap-1.5">
-          <span className="text-gray-400">Arc USDC</span>
-          <span className="font-mono font-medium text-gray-700">
+          <span className="text-gray-400 dark:text-gray-500">Arc USDC</span>
+          <span className="font-mono font-medium text-gray-700 dark:text-gray-200">
             {usdc.isLoading ? <span className="shimmer inline-block w-10 h-3 rounded" /> : usdc.formatted}
           </span>
         </div>
@@ -37,7 +37,7 @@ export function BalanceDisplay() {
           href={ARC_FAUCET_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1 flex-shrink-0"
+          className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors flex items-center gap-1 flex-shrink-0"
         >
           Get gas
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -29,13 +29,13 @@ export function ConnectButton() {
   if (isConnected && address) {
     return (
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-gray-200 shadow-sm">
+        <div className="flex items-center gap-2 bg-white dark:bg-white/5 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
           <span className="w-2 h-2 rounded-full bg-emerald-500 pulse-dot" />
-          <span className="text-sm text-gray-700 font-mono">{shortenAddress(address)}</span>
+          <span className="text-sm text-gray-700 dark:text-gray-200 font-mono">{shortenAddress(address)}</span>
         </div>
         <button
           onClick={() => disconnect()}
-          className="text-xs text-gray-400 hover:text-red-500 transition-colors px-2 py-1.5"
+          className="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors px-2 py-1.5"
         >
           Disconnect
         </button>
@@ -51,7 +51,7 @@ export function ConnectButton() {
     : connectors.filter((c) => c.id !== 'injected')
 
   if (visibleConnectors.length === 0) {
-    return <p className="text-sm text-gray-500">Install MetaMask to continue.</p>
+    return <p className="text-sm text-gray-500 dark:text-gray-400">Install MetaMask to continue.</p>
   }
 
   // One connector — a single button. Multiple connectors — one button that
@@ -76,7 +76,7 @@ export function ConnectButton() {
           )}
         </button>
         {error && (
-          <p className="absolute right-0 top-full mt-2 w-56 text-xs text-red-500 bg-white border border-red-100 rounded-lg px-3 py-2 shadow-sm z-20">
+          <p className="absolute right-0 top-full mt-2 w-56 text-xs text-red-500 dark:text-red-400 bg-white dark:bg-gray-900 border border-red-100 dark:border-red-400/20 rounded-lg px-3 py-2 shadow-sm z-20">
             {formatConnectError(error)}
           </p>
         )}
@@ -116,7 +116,7 @@ export function ConnectButton() {
                 connect({ connector })
                 setMenuOpen(false)
               }}
-              className="w-full text-left px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-full text-left px-3 py-2 rounded-xl text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
             >
               {CONNECTOR_LABELS[connector.id] ?? connector.name}
             </button>
@@ -125,7 +125,7 @@ export function ConnectButton() {
       )}
 
       {error && !menuOpen && (
-        <p className="absolute right-0 top-full mt-2 w-56 text-xs text-red-500 bg-white border border-red-100 rounded-lg px-3 py-2 shadow-sm z-20">
+        <p className="absolute right-0 top-full mt-2 w-56 text-xs text-red-500 dark:text-red-400 bg-white dark:bg-gray-900 border border-red-100 dark:border-red-400/20 rounded-lg px-3 py-2 shadow-sm z-20">
           {formatConnectError(error)}
         </p>
       )}

@@ -22,7 +22,7 @@ export function ChainIcon({ chainId, size = 24, className = '' }: ChainIconProps
         alt="Arc Testnet"
         width={size}
         height={size}
-        className={`rounded-full ring-1 ring-black/5 flex-shrink-0 ${className}`}
+        className={`rounded-full ring-1 ring-black/5 dark:ring-white/10 flex-shrink-0 ${className}`}
         style={{ width: size, height: size }}
       />
     )
@@ -33,7 +33,7 @@ export function ChainIcon({ chainId, size = 24, className = '' }: ChainIconProps
   if (!style) {
     return (
       <div
-        className={`rounded-full flex items-center justify-center text-[10px] font-bold text-gray-400 bg-gray-100 ring-1 ring-black/5 flex-shrink-0 ${className}`}
+        className={`rounded-full flex items-center justify-center text-[10px] font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-white/10 ring-1 ring-black/5 dark:ring-white/10 flex-shrink-0 ${className}`}
         style={{ width: size, height: size }}
       >
         ?
@@ -48,7 +48,7 @@ export function ChainIcon({ chainId, size = 24, className = '' }: ChainIconProps
         width: size,
         height: size,
         background: style.bg,
-        boxShadow: `0 0 0 2px #ffffff, 0 0 0 3px ${style.ring}`,
+        boxShadow: `0 0 0 2px var(--card-surface), 0 0 0 3px ${style.ring}`,
         fontSize: size * 0.42,
       }}
     >

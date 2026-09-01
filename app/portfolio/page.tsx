@@ -29,8 +29,8 @@ export default function PortfolioPage() {
           <div className="flex justify-center order-1 lg:order-2">
             <div className="max-w-md w-full">
               <div className="px-1 mb-5">
-                <h1 className="text-xl font-bold text-gray-900 tracking-tight">Portfolio</h1>
-                <p className="text-xs text-gray-500 mt-1">Live balances across every supported chain</p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Portfolio</h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Live balances across every supported chain</p>
               </div>
 
               {!isConnected ? (
@@ -38,18 +38,18 @@ export default function PortfolioPage() {
               ) : (
                 <div className="space-y-3 fade-in">
                   <div className="widget-card rounded-3xl p-6">
-                    <span className="text-[11px] text-gray-400 uppercase tracking-widest font-medium">
+                    <span className="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-medium">
                       Total USDC · {chainsWithFunds} of {balances.length} chains funded
                     </span>
-                    <p className="text-4xl font-bold text-gray-900 tracking-tight mt-2 tabular-nums">
+                    <p className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight mt-2 tabular-nums">
                       {isLoading && totalUsdc === 0n ? (
                         <span className="shimmer inline-block w-40 h-9 rounded align-middle" />
                       ) : (
                         formatUsdcBalance(totalUsdc)
                       )}
-                      <span className="text-lg font-semibold text-gray-400 ml-1.5">USDC</span>
+                      <span className="text-lg font-semibold text-gray-400 dark:text-gray-500 ml-1.5">USDC</span>
                     </p>
-                    <p className="text-xs text-gray-400 mt-2">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                       Testnet tokens — combined ERC-20 USDC balance, summed across chains at face value.
                     </p>
                   </div>
@@ -58,28 +58,28 @@ export default function PortfolioPage() {
                     {balances.map(({ chainId, usdc, gas }) => (
                       <div
                         key={chainId}
-                        className="flex items-center justify-between gap-3 p-3 rounded-2xl hover:bg-gray-900/[0.02] transition-colors"
+                        className="flex items-center justify-between gap-3 p-3 rounded-2xl hover:bg-gray-900/[0.02] dark:hover:bg-white/5 transition-colors"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <ChainIcon chainId={chainId} size={30} />
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{CHAIN_NAMES[chainId]}</p>
-                            <p className="text-[11px] text-gray-400">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{CHAIN_NAMES[chainId]}</p>
+                            <p className="text-[11px] text-gray-400 dark:text-gray-500">
                               Gas: {gas.isLoading ? '—' : gas.formatted} {NATIVE_GAS_SYMBOLS[chainId] ?? ''}
                             </p>
                           </div>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-sm font-semibold font-mono text-gray-900 tabular-nums">
+                          <p className="text-sm font-semibold font-mono text-gray-900 dark:text-white tabular-nums">
                             {usdc.isLoading ? '—' : usdc.formatted}
                           </p>
-                          <p className="text-[11px] text-gray-400">USDC</p>
+                          <p className="text-[11px] text-gray-400 dark:text-gray-500">USDC</p>
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  <p className="text-[11px] text-gray-400 text-center px-2">
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center px-2">
                     Balances refresh automatically every 10 seconds.
                   </p>
                 </div>

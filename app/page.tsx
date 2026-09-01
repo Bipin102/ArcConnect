@@ -21,8 +21,8 @@ export default function Home() {
               {/* Compact heading */}
               <div className="flex items-center justify-between px-1 mb-5">
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 tracking-tight">Bridge USDC to Arc</h1>
-                  <p className="text-xs text-gray-500 mt-1">Settled via Circle CCTP · testnet only</p>
+                  <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Bridge USDC to Arc</h1>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Settled via Circle CCTP · testnet only</p>
                 </div>
               </div>
 

@@ -101,9 +101,9 @@ export function PaymentForm() {
       <div className="widget-card rounded-3xl p-4">
         {/* Widget header */}
         <div className="flex items-center justify-between px-1.5 pb-3">
-          <span className="text-sm font-semibold text-gray-900">Bridge</span>
-          <span className="text-[11px] text-gray-500 bg-gray-50 border border-gray-200 px-2 py-1 rounded-full flex items-center gap-1">
-            <svg className="w-3 h-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">Bridge</span>
+          <span className="text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-2 py-1 rounded-full flex items-center gap-1">
+            <svg className="w-3 h-3 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             Circle CCTP
@@ -114,14 +114,14 @@ export function PaymentForm() {
           {/* From slot */}
           <div className="slot-card rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] text-gray-400 uppercase tracking-widest font-medium">From</span>
+              <span className="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-medium">From</span>
               {!isSupportedChain ? (
-                <span className="flex items-center gap-1 text-[11px] text-red-500">
+                <span className="flex items-center gap-1 text-[11px] text-red-500 dark:text-red-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
                   Unsupported
                 </span>
               ) : (
-                <span className="text-[11px] text-gray-400">
+                <span className="text-[11px] text-gray-400 dark:text-gray-500">
                   Balance: {sourceUsdc.isLoading ? '—' : sourceUsdc.formatted}
                 </span>
               )}
@@ -133,13 +133,13 @@ export function PaymentForm() {
                   type="button"
                   onClick={() => setFromMenuOpen((v) => !v)}
                   disabled={isSwitching}
-                  className="flex items-center gap-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl pl-2 pr-2.5 py-2 transition-colors disabled:opacity-50 shadow-sm"
+                  className="flex items-center gap-2 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 rounded-xl pl-2 pr-2.5 py-2 transition-colors disabled:opacity-50 shadow-sm"
                 >
                   {chainId ? <ChainIcon chainId={chainId} size={22} /> : (
-                    <span className="w-[22px] h-[22px] rounded-full bg-gray-100" />
+                    <span className="w-[22px] h-[22px] rounded-full bg-gray-100 dark:bg-white/10" />
                   )}
-                  <span className="text-sm font-medium text-gray-900 whitespace-nowrap">{currentChainName}</span>
-                  <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${fromMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">{currentChainName}</span>
+                  <svg className={`w-3.5 h-3.5 text-gray-400 dark:text-gray-500 transition-transform ${fromMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
@@ -152,13 +152,13 @@ export function PaymentForm() {
                         type="button"
                         onClick={() => { switchChain({ chainId: id }); setFromMenuOpen(false) }}
                         className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm transition-colors ${
-                          id === chainId ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'
+                          id === chainId ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
                         }`}
                       >
                         <ChainIcon chainId={id} size={20} />
                         {CHAIN_NAMES[id]}
                         {id === chainId && (
-                          <svg className="w-3.5 h-3.5 ml-auto text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3.5 h-3.5 ml-auto text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                           </svg>
                         )}
@@ -176,7 +176,7 @@ export function PaymentForm() {
                 min="0"
                 step="0.000001"
                 disabled={isPending}
-                className="flex-1 min-w-0 bg-transparent text-right text-2xl font-semibold text-gray-900 placeholder-gray-300 outline-none disabled:opacity-40"
+                className="flex-1 min-w-0 bg-transparent text-right text-2xl font-semibold text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 outline-none disabled:opacity-40"
               />
             </div>
             {isSupportedChain && sourceUsdc.raw > 0n && (
@@ -185,7 +185,7 @@ export function PaymentForm() {
                   type="button"
                   onClick={() => { setAmount(formatUnits(sourceUsdc.raw, ERC20_USDC_DECIMALS)); setErrors((p) => ({ ...p, amount: undefined })) }}
                   disabled={isPending}
-                  className="text-[11px] font-medium text-indigo-600 hover:text-indigo-700 transition-colors disabled:opacity-40"
+                  className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors disabled:opacity-40"
                 >
                   Max
                 </button>
@@ -194,7 +194,7 @@ export function PaymentForm() {
             {isSupportedChain && (
               <div className="flex items-center gap-1.5 mt-2 text-[11px]">
                 <span className={`w-1.5 h-1.5 rounded-full ${sourceGas.raw > 0n ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                <span className="text-gray-400">
+                <span className="text-gray-400 dark:text-gray-500">
                   Gas: {sourceGas.isLoading ? '—' : sourceGas.formatted} {gasSymbol}
                 </span>
                 {sourceGas.raw === 0n && gasFaucetUrl && (
@@ -202,7 +202,7 @@ export function PaymentForm() {
                     href={gasFaucetUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-indigo-600 hover:text-indigo-700 transition-colors ml-auto"
+                    className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors ml-auto"
                   >
                     Get {gasSymbol}
                   </a>
@@ -210,7 +210,7 @@ export function PaymentForm() {
               </div>
             )}
             {errors.amount && (
-              <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
+              <p className="text-red-500 dark:text-red-400 text-xs mt-2 flex items-center gap-1">
                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
@@ -227,9 +227,9 @@ export function PaymentForm() {
               disabled={!canReverse}
               aria-label="Reverse direction"
               title="Reverse direction"
-              className="swap-divider absolute -top-4 w-9 h-9 rounded-xl flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="swap-divider absolute -top-4 w-9 h-9 rounded-xl flex items-center justify-center hover:bg-gray-50 dark:hover:bg-white/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4" />
               </svg>
             </button>
@@ -238,8 +238,8 @@ export function PaymentForm() {
           {/* To slot */}
           <div className="slot-card rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] text-gray-400 uppercase tracking-widest font-medium">To</span>
-              <span className="text-[11px] text-gray-400">
+              <span className="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-medium">To</span>
+              <span className="text-[11px] text-gray-400 dark:text-gray-500">
                 Balance: {destinationUsdc.isLoading ? '—' : destinationUsdc.formatted}
               </span>
             </div>
@@ -249,11 +249,11 @@ export function PaymentForm() {
                   type="button"
                   onClick={() => setToMenuOpen((v) => !v)}
                   disabled={isPending}
-                  className="flex items-center gap-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl pl-2 pr-2.5 py-2 transition-colors disabled:opacity-50 shadow-sm"
+                  className="flex items-center gap-2 bg-white dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 rounded-xl pl-2 pr-2.5 py-2 transition-colors disabled:opacity-50 shadow-sm"
                 >
                   <ChainIcon chainId={destinationChainId} size={22} />
-                  <span className="text-sm font-medium text-gray-900 whitespace-nowrap">{destinationChainName}</span>
-                  <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${toMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">{destinationChainName}</span>
+                  <svg className={`w-3.5 h-3.5 text-gray-400 dark:text-gray-500 transition-transform ${toMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
@@ -266,7 +266,7 @@ export function PaymentForm() {
                         type="button"
                         onClick={() => { setDestinationChainId(id); setToMenuOpen(false) }}
                         className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-sm transition-colors ${
-                          id === destinationChainId ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'
+                          id === destinationChainId ? 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5'
                         }`}
                       >
                         <ChainIcon chainId={id} size={20} />
@@ -281,7 +281,7 @@ export function PaymentForm() {
                   </div>
                 )}
               </div>
-              <span className="flex-1 min-w-0 text-right text-2xl font-semibold text-gray-300 truncate">
+              <span className="flex-1 min-w-0 text-right text-2xl font-semibold text-gray-300 dark:text-gray-600 truncate">
                 {amount || '0.00'}
               </span>
             </div>
@@ -289,11 +289,11 @@ export function PaymentForm() {
         </div>
 
         {isSameChain && (
-          <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-2.5 mt-3">
-            <svg className="w-4 h-4 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-400/20 rounded-xl px-3 py-2.5 mt-3">
+            <svg className="w-4 h-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-xs text-indigo-600">Same network on both sides — this will send USDC same-chain.</p>
+            <p className="text-xs text-indigo-600 dark:text-indigo-300">Same network on both sides — this will send USDC same-chain.</p>
           </div>
         )}
 
@@ -301,14 +301,14 @@ export function PaymentForm() {
           {/* Recipient */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-[11px] font-medium text-gray-400 uppercase tracking-widest">
+              <label className="block text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                 Recipient on {destinationChainName}
               </label>
               {address && (
                 <button
                   type="button"
                   onClick={() => { setRecipient(address); setErrors((p) => ({ ...p, recipient: undefined })) }}
-                  className="text-[11px] text-indigo-600 hover:text-indigo-700 transition-colors"
+                  className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
                 >
                   Use my address
                 </button>
@@ -320,10 +320,10 @@ export function PaymentForm() {
               onChange={(e) => { setRecipient(e.target.value); setErrors((p) => ({ ...p, recipient: undefined })) }}
               placeholder="0x0000...0000"
               disabled={isPending}
-              className="w-full bg-white border border-gray-200 focus:border-indigo-400 rounded-xl px-4 py-3 text-sm font-mono text-gray-900 placeholder-gray-300 outline-none transition-all disabled:opacity-40"
+              className="w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 focus:border-indigo-400 dark:focus:border-indigo-400 rounded-xl px-4 py-3 text-sm font-mono text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 outline-none transition-all disabled:opacity-40"
             />
             {errors.recipient && (
-              <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+              <p className="text-red-500 dark:text-red-400 text-xs mt-1.5 flex items-center gap-1">
                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
@@ -333,18 +333,18 @@ export function PaymentForm() {
           </div>
 
           {/* Route summary */}
-          <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 space-y-2">
+          <div className="bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl px-4 py-3 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400">Route</span>
-              <span className="text-xs font-medium text-gray-700">{isSameChain ? 'Direct transfer' : 'Circle CCTP'}</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">Route</span>
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{isSameChain ? 'Direct transfer' : 'Circle CCTP'}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400">Estimated time</span>
-              <span className="text-xs font-medium text-gray-700">{isSameChain ? '~10 sec' : '~1–3 min'}</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">Estimated time</span>
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{isSameChain ? '~10 sec' : '~1–3 min'}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400">Bridge fee</span>
-              <span className="text-xs font-medium text-emerald-600">Free — network gas only</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">Bridge fee</span>
+              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Free — network gas only</span>
             </div>
           </div>
 
@@ -373,7 +373,7 @@ export function PaymentForm() {
         </form>
 
         {!isSupportedChain && isConnected && (
-          <p className="text-xs text-gray-400 text-center mt-3">Switch to a supported chain above to continue.</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-3">Switch to a supported chain above to continue.</p>
         )}
 
         <div className="flex items-center justify-center pt-3">
@@ -381,7 +381,7 @@ export function PaymentForm() {
             href="https://faucet.circle.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors flex items-center gap-1"
+            className="text-xs text-gray-400 dark:text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
