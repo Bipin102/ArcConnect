@@ -6,6 +6,7 @@ import { NetworkGuard } from '@/components/NetworkGuard'
 import { BalanceDisplay } from '@/components/BalanceDisplay'
 import { PaymentForm } from '@/components/PaymentForm'
 import { StatsSidebar } from '@/components/StatsSidebar'
+import { CreditChip } from '@/components/CreditChip'
 
 export default function Home() {
   return (
@@ -58,7 +59,7 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <div className="mt-14 pt-6 border-t border-gray-900/[0.06] flex items-center justify-between">
+        <div className="mt-14 pt-6 border-t border-gray-900/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-xs text-gray-400">
             Gas token is USDC, not ETH ·{' '}
             <a
@@ -70,17 +71,11 @@ export default function Home() {
               docs.arc.io
             </a>
           </p>
-          <a
-            href="https://x.com/ArcConnect_"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-gray-400 hover:text-indigo-600 transition-colors text-xs flex-shrink-0"
-          >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
-            @ArcConnect_
-          </a>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-gray-400 mr-0.5">Built by</span>
+            <CreditChip name="Bipin" handle="Bipin_xyz" initial="B" gradient="from-indigo-500 to-blue-500" />
+            <CreditChip name="ArcConnect" handle="ArcConnect_" initial="A" gradient="from-violet-500 to-indigo-600" />
+          </div>
         </div>
       </main>
     </div>
