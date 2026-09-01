@@ -15,6 +15,13 @@ export const ARC_FAUCET_URL = 'https://faucet.circle.com'
 export const ARC_USDC_ADDRESS =
   '0x3600000000000000000000000000000000000000' as const
 
+// EURC on Arc Testnet (6 decimals)
+// Source: https://docs.arc.io/arc/references/contract-addresses
+export const ARC_EURC_ADDRESS =
+  '0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a' as const
+
+export const ERC20_EURC_DECIMALS = 6
+
 // ERC-20 USDC contract addresses per supported testnet (all 6 decimals)
 // Source: https://developers.circle.com/stablecoins/usdc-contract-addresses
 export const USDC_ADDRESSES: Record<number, `0x${string}`> = {

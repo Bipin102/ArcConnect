@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ConnectButton } from '@/components/ConnectButton'
 
 interface SiteNavProps {
-  active: 'bridge' | 'portfolio'
+  active: 'bridge' | 'swap' | 'portfolio'
 }
 
 export function SiteNav({ active }: SiteNavProps) {
@@ -31,6 +31,7 @@ export function SiteNav({ active }: SiteNavProps) {
         </div>
         <div className="hidden sm:flex items-center gap-1 text-sm text-gray-500">
           <Link href="/" className={linkClass(active === 'bridge')}>Bridge</Link>
+          <Link href="/swap" className={linkClass(active === 'swap')}>Swap</Link>
           <Link href="/portfolio" className={linkClass(active === 'portfolio')}>Portfolio</Link>
           <a href="https://docs.arc.io" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-lg hover:text-gray-900 hover:bg-gray-900/[0.04] transition-colors">Docs</a>
           <a href="https://testnet.arcscan.app" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-lg hover:text-gray-900 hover:bg-gray-900/[0.04] transition-colors">Explorer</a>
