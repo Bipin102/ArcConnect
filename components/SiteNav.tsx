@@ -4,7 +4,7 @@ import { ConnectButton } from '@/components/ConnectButton'
 import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface SiteNavProps {
-  active: 'bridge' | 'swap' | 'portfolio' | 'about'
+  active: 'home' | 'bridge' | 'swap' | 'portfolio'
 }
 
 export function SiteNav({ active }: SiteNavProps) {
@@ -31,10 +31,10 @@ export function SiteNav({ active }: SiteNavProps) {
           </span>
         </div>
         <div className="hidden sm:flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
-          <Link href="/" className={linkClass(active === 'bridge')}>Bridge</Link>
+          <Link href="/" className={linkClass(active === 'home')}>Home</Link>
+          <Link href="/bridge" className={linkClass(active === 'bridge')}>Bridge</Link>
           <Link href="/swap" className={linkClass(active === 'swap')}>Swap</Link>
           <Link href="/portfolio" className={linkClass(active === 'portfolio')}>Portfolio</Link>
-          <Link href="/about" className={linkClass(active === 'about')}>About</Link>
           <a href="https://docs.arc.io" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-lg hover:text-gray-900 dark:hover:text-white hover:bg-gray-900/[0.04] dark:hover:bg-white/[0.08] transition-colors">Docs</a>
           <a href="https://testnet.arcscan.app" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-lg hover:text-gray-900 dark:hover:text-white hover:bg-gray-900/[0.04] dark:hover:bg-white/[0.08] transition-colors">Explorer</a>
         </div>

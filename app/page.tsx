@@ -1,37 +1,192 @@
 'use client'
 
-import { NetworkGuard } from '@/components/NetworkGuard'
-import { BalanceDisplay } from '@/components/BalanceDisplay'
-import { PaymentForm } from '@/components/PaymentForm'
-import { StatsSidebar } from '@/components/StatsSidebar'
+import Link from 'next/link'
 import { SiteNav } from '@/components/SiteNav'
 import { SiteFooter } from '@/components/SiteFooter'
+import { ARC_CHAIN_ID, ARC_RPC_URL, ARC_EXPLORER_URL, ARC_FAUCET_URL } from '@/lib/constants'
+
+const STEPS = [
+  {
+    n: '01',
+    title: 'Connect a wallet',
+    body: 'MetaMask or any injected wallet on desktop; WalletConnect opens your mobile wallet app if there’s no browser extension.',
+  },
+  {
+    n: '02',
+    title: 'Get testnet funds',
+    body: 'Grab USDC (and native gas on non-Arc chains) from the official Circle faucet before your first transfer.',
+  },
+  {
+    n: '03',
+    title: 'Bridge, swap, or track',
+    body: 'Move USDC into Arc from five testnets, swap USDC ⇄ EURC natively on Arc, or check balances across every chain in one view.',
+  },
+]
+
+const SPECS: { label: string; value: string; href?: string }[] = [
+  { label: 'Network name', value: 'Arc Testnet' },
+  { label: 'Chain ID', value: String(ARC_CHAIN_ID) },
+  { label: 'Native gas token', value: 'USDC (18 decimals)' },
+  { label: 'ERC-20 USDC', value: '6 decimals' },
+  { label: 'RPC endpoint', value: ARC_RPC_URL, href: ARC_RPC_URL },
+  { label: 'Block explorer', value: 'testnet.arcscan.app', href: ARC_EXPLORER_URL },
+]
+
+const FEATURES = [
+  {
+    href: '/bridge',
+    title: 'Bridge',
+    body: 'Move USDC into Arc from Ethereum, Base, Arbitrum, or Avalanche testnets via Circle’s CCTP — or send same-chain once you’re already on Arc.',
+  },
+  {
+    href: '/swap',
+    title: 'Swap',
+    body: 'Native USDC ⇄ EURC swap on Arc Testnet, priced with a live quote from Circle’s swap API — not a flat 1:1 assumption.',
+  },
+  {
+    href: '/portfolio',
+    title: 'Portfolio',
+    body: 'One view of your USDC and gas balances across every supported chain, refreshing automatically.',
+  },
+]
 
 export default function Home() {
   return (
     <div className="bg-mesh min-h-screen">
-      <SiteNav active="bridge" />
+      <SiteNav active="home" />
 
-      <main className="max-w-6xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-[16rem_1fr] gap-8">
-          <StatsSidebar className="w-full lg:sticky lg:top-24 order-2 lg:order-1" />
+      <main className="max-w-4xl mx-auto px-4 py-16">
+        {/* Hero */}
+        <div className="text-center max-w-xl mx-auto mb-16">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-400/20 px-3 py-1 rounded-full mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 pulse-dot" />
+            ArcConnect
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-3">
+            USDC, moving on Arc — bridge, swap, or hold
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+            A small, focused toolkit for Arc Testnet: get USDC in from other chains, swap it for EURC natively, and
+            see where your funds actually sit. No points, no fake yield — every number on this site is read directly
+            from a chain or from Circle&apos;s own APIs.
+          </p>
+        </div>
 
-          <div className="flex justify-center order-1 lg:order-2">
-            <div className="max-w-md w-full">
-              {/* Compact heading */}
-              <div className="flex items-center justify-between px-1 mb-5">
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Bridge USDC to Arc</h1>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Settled via Circle CCTP · testnet only</p>
-                </div>
+        {/* How it works */}
+        <section className="mb-16">
+          <h2 className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-5 text-center">How it works</h2>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {STEPS.map((step) => (
+              <div key={step.n} className="widget-card rounded-2xl p-5">
+                <span className="text-xs font-mono text-indigo-500 dark:text-indigo-400">{step.n}</span>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mt-2 mb-1.5">{step.title}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{step.body}</p>
               </div>
+            ))}
+          </div>
+        </section>
 
-              <NetworkGuard />
-              <BalanceDisplay />
-              <PaymentForm />
+        {/* CTA banner — the on-ramp into the actual app */}
+        <section className="mb-16">
+          <div className="rounded-3xl overflow-hidden relative px-8 py-12 sm:px-14 sm:py-14 text-center">
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(135deg, #1c1533 0%, #221a3d 45%, #14213d 100%)' }}
+            />
+            <div
+              className="absolute inset-0 opacity-70"
+              style={{
+                backgroundImage:
+                  'radial-gradient(600px 300px at 15% 0%, rgba(139,92,246,0.35), transparent 60%), radial-gradient(500px 300px at 100% 100%, rgba(37,99,235,0.3), transparent 60%)',
+              }}
+            />
+            <div className="relative">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-3">
+                Ready to move USDC on Arc?
+              </h2>
+              <p className="text-indigo-200/80 text-sm max-w-md mx-auto mb-8 leading-relaxed">
+                Connect a wallet and bridge in from any supported testnet — the rest of the toolkit is one click away.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href="/bridge"
+                  className="btn-gradient text-white font-semibold px-6 py-3 rounded-xl text-sm inline-flex items-center gap-2"
+                >
+                  Enter the App
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
+                <a
+                  href={ARC_EXPLORER_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-white/90 hover:text-white border border-white/15 hover:border-white/30 px-6 py-3 rounded-xl transition-colors"
+                >
+                  Arc Block Explorer
+                </a>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* Feature grid */}
+        <section className="mb-16">
+          <h2 className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-5 text-center">What you can do here</h2>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {FEATURES.map((f) => (
+              <Link
+                key={f.href}
+                href={f.href}
+                className="widget-card rounded-2xl p-5 flex flex-col hover:-translate-y-0.5 transition-transform"
+              >
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1.5">{f.title}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed flex-1">{f.body}</p>
+                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 mt-3 flex items-center gap-1">
+                  Open
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Protocol specs */}
+        <section>
+          <h2 className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-5 text-center">Built on Arc Testnet</h2>
+          <div className="widget-card rounded-2xl overflow-hidden">
+            {SPECS.map((spec, i) => (
+              <div
+                key={spec.label}
+                className={`flex items-center justify-between px-5 py-3.5 ${i !== SPECS.length - 1 ? 'border-b border-gray-100 dark:border-white/10' : ''}`}
+              >
+                <span className="text-xs text-gray-400 dark:text-gray-500">{spec.label}</span>
+                {spec.href ? (
+                  <a
+                    href={spec.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-mono text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                  >
+                    {spec.value}
+                  </a>
+                ) : (
+                  <span className="text-sm font-mono text-gray-900 dark:text-white">{spec.value}</span>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-4">
+            Arc is designed around sub-second deterministic finality, with gas paid in USDC instead of a separate
+            token. Need funds? Visit the{' '}
+            <a href={ARC_FAUCET_URL} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
+              official Circle faucet
+            </a>
+            .
+          </p>
+        </section>
 
         <SiteFooter />
       </main>
