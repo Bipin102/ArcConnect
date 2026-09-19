@@ -12,7 +12,7 @@ import {
   AvalancheFuji,
 } from '@circle-fin/app-kit/chains'
 import { buildExplorerTxUrl } from '@/lib/utils'
-import { CHAIN_NAMES } from '@/lib/constants'
+import { CHAIN_NAMES, ARC_CHAIN_ID } from '@/lib/constants'
 
 export type PayStatus =
   | { state: 'idle' }
@@ -36,13 +36,17 @@ const SUPPORTED_SOURCE_CHAINS = [
   ArcTestnet,
 ]
 
-// Map wagmi chain ID to BridgeChain enum value
+// Map wagmi chain ID to BridgeChain enum value. Arc's entry always maps to
+// Circle's Arc_Testnet enum today — @circle-fin/app-kit doesn't expose an
+// Arc mainnet BridgeChain yet, so bridging still targets testnet even if
+// ARC_CHAIN_ID itself is switched via lib/networks.ts. Update this once the
+// SDK ships mainnet support.
 const CHAIN_ID_TO_BRIDGE_CHAIN: Record<number, BridgeChain> = {
   11155111: BridgeChain.Ethereum_Sepolia,
   84532: BridgeChain.Base_Sepolia,
   421614: BridgeChain.Arbitrum_Sepolia,
   43113: BridgeChain.Avalanche_Fuji,
-  5042002: BridgeChain.Arc_Testnet,
+  [ARC_CHAIN_ID]: BridgeChain.Arc_Testnet,
 }
 
 // Extract the last successful tx hash from bridge result steps

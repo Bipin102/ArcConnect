@@ -2,6 +2,7 @@ import { createConfig, http } from 'wagmi'
 import { sepolia, baseSepolia, arbitrumSepolia, avalancheFuji } from 'wagmi/chains'
 import { injected, walletConnect } from 'wagmi/connectors'
 import { arcTestnet } from './arcChain'
+import { ARC_RPC_URL } from './constants'
 
 const connectors = [
   injected(),
@@ -19,7 +20,7 @@ export const wagmiConfig = createConfig({
   chains: [arcTestnet, sepolia, baseSepolia, arbitrumSepolia, avalancheFuji],
   connectors,
   transports: {
-    [arcTestnet.id]: http('https://rpc.testnet.arc.network'),
+    [arcTestnet.id]: http(ARC_RPC_URL),
     [sepolia.id]: http(),
     [baseSepolia.id]: http(),
     [arbitrumSepolia.id]: http(),

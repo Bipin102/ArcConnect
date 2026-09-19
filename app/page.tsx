@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { SiteNav } from '@/components/SiteNav'
 import { SiteFooter } from '@/components/SiteFooter'
 import { ARC_CHAIN_ID, ARC_RPC_URL, ARC_EXPLORER_URL, ARC_FAUCET_URL } from '@/lib/constants'
+import { ACTIVE_ARC_CONFIG } from '@/lib/networks'
 
 const STEPS = [
   {
@@ -24,12 +25,12 @@ const STEPS = [
 ]
 
 const SPECS: { label: string; value: string; href?: string }[] = [
-  { label: 'Network name', value: 'Arc Testnet' },
+  { label: 'Network name', value: ACTIVE_ARC_CONFIG.label },
   { label: 'Chain ID', value: String(ARC_CHAIN_ID) },
   { label: 'Native gas token', value: 'USDC (18 decimals)' },
   { label: 'ERC-20 USDC', value: '6 decimals' },
   { label: 'RPC endpoint', value: ARC_RPC_URL, href: ARC_RPC_URL },
-  { label: 'Block explorer', value: 'testnet.arcscan.app', href: ARC_EXPLORER_URL },
+  { label: 'Block explorer', value: ARC_EXPLORER_URL.replace(/^https?:\/\//, ''), href: ARC_EXPLORER_URL },
 ]
 
 const FEATURES = [

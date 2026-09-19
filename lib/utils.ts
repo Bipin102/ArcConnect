@@ -32,26 +32,8 @@ export function shortenAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
-// Build a block explorer transaction URL for the given chain (defaults to Arc Testnet)
+// Build a block explorer transaction URL for the given chain (defaults to Arc)
 export function buildExplorerTxUrl(txHash: string, chainId: number = ARC_CHAIN_ID): string {
   const base = EXPLORER_BASE_URLS[chainId] ?? EXPLORER_BASE_URLS[ARC_CHAIN_ID]
   return `${base}/tx/${txHash}`
-}
-
-// Map App Kit chain string to wagmi chain ID
-export const APPKIT_CHAIN_TO_CHAIN_ID: Record<string, number> = {
-  Ethereum_Sepolia: 11155111,
-  Base_Sepolia: 84532,
-  Arbitrum_Sepolia: 421614,
-  Avalanche_Fuji: 43113,
-  Arc_Testnet: 5042002,
-}
-
-// Map wagmi chain ID to App Kit Blockchain enum string
-export const CHAIN_ID_TO_APPKIT: Record<number, string> = {
-  11155111: 'Ethereum_Sepolia',
-  84532: 'Base_Sepolia',
-  421614: 'Arbitrum_Sepolia',
-  43113: 'Avalanche_Fuji',
-  5042002: 'Arc_Testnet',
 }
