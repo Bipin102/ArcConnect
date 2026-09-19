@@ -1,19 +1,24 @@
 // Arc network configuration — a single source of truth that the rest of the
 // app derives its Arc-specific constants from.
 //
-// Testnet is fully live and every value below has been verified against
-// https://docs.arc.io. Mainnet is a placeholder scaffold ONLY: Arc mainnet
-// had not launched as of 2026-09-19 (docs.arc.io only documents testnet —
-// no mainnet chain ID, RPC, explorer, or contract addresses exist yet).
+// Arc Mainnet is real and live as of 2026-09-19 (chain ID 5042). Verified
+// independently across three sources before filling anything in below:
+// the RPC's own eth_chainId response, Alchemy's public chain-connect page,
+// and docs.arc.io/arc/references/connect-to-arc. USDC and EURC addresses
+// were each confirmed on-chain via symbol()/decimals() calls against
+// https://rpc.mainnet.arc.io, the same way every testnet value here was
+// verified rather than trusted from a doc alone.
 //
-// When Arc mainnet does ship, fill in `mainnet` below with values verified
-// fresh from https://docs.arc.io/arc/references/connect-to-arc and
-// https://docs.arc.io/arc/references/contract-addresses — never guess or
-// carry over testnet numbers — then flip `isLive: true`. Note this only
-// prepares ArcConnect's own frontend config; the actual bridge/swap flows
-// also depend on Circle's App Kit SDK (@circle-fin/app-kit) shipping an
-// Arc mainnet BridgeChain — that's a separate, external dependency this
-// file can't control.
+// `isLive` is still false, deliberately. The Arc chain itself is live, but
+// bridge/swap here goes through Circle's App Kit SDK (@circle-fin/app-kit),
+// and the installed version's BridgeChain enum only has Arc_Testnet — no
+// mainnet entry (see hooks/usePay.ts, hooks/useSwap.ts). Flipping isLive
+// before that SDK support exists would let someone submit a real-money
+// bridge against testnet CCTP domain/contract data — a real way to lose
+// funds, not a hypothetical one. Flip it only once @circle-fin/app-kit
+// ships Arc mainnet support, and re-verify these values are still current
+// first (mainnet.faucetUrl is intentionally blank — there is no mainnet
+// faucet; any UI copy that assumes one needs a pass before this goes live).
 
 export type ArcNetworkKey = 'testnet' | 'mainnet'
 
@@ -49,17 +54,28 @@ export const ARC_NETWORKS: Record<ArcNetworkKey, ArcNetworkConfig> = {
   },
   mainnet: {
     key: 'mainnet',
-    label: 'Arc Mainnet (not yet available)',
-    // Placeholders only — do not use. See file header before filling these in.
-    chainId: 0,
-    rpcUrl: '',
+    label: 'Arc Mainnet',
+    chainId: 5042,
+    // Official public RPC — verified working, no API key required. A
+    // private/paid RPC (e.g. Alchemy) can be swapped in later via an env
+    // var if needed for reliability; never hardcode a personal API key into
+    // this file, since it ships in the public repo and the client bundle.
+    rpcUrl: 'https://rpc.mainnet.arc.io',
+    // Not independently verified (wss endpoint untested) — leave blank
+    // rather than guess; wagmi/viem work fine without it.
     wsRpcUrl: '',
-    explorerUrl: '',
-    explorerName: 'Arcscan',
+    explorerUrl: 'https://explorer.arc.io',
+    explorerName: 'Arc Explorer',
+    // No mainnet faucet exists — this is intentionally blank, see file header.
     faucetUrl: '',
-    usdcAddress: '0x0000000000000000000000000000000000000000',
-    eurcAddress: '0x0000000000000000000000000000000000000000',
-    cctpDomain: -1,
+    usdcAddress: '0x3600000000000000000000000000000000000000',
+    eurcAddress: '0xbEf5f6d51CB62b58e6A8f77868681825C6fe21c1',
+    // Circle's CCTP domain list doesn't distinguish Arc testnet vs mainnet
+    // (both listed simply as "Arc" = 26 as of this verification) — re-check
+    // this specifically before it's ever used for a real transfer.
+    cctpDomain: 26,
+    // See file header — blocked on @circle-fin/app-kit shipping Arc mainnet
+    // BridgeChain support, not on this config being incomplete.
     isLive: false,
   },
 }
